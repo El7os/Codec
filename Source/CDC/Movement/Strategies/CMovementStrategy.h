@@ -9,7 +9,16 @@
 /**
  * 
  */
-UCLASS()
+
+UENUM()
+enum EAccelerationType
+{
+	ByPrecent,
+	Fixed
+};
+
+
+UCLASS(Blueprintable)
 class CDC_API UCMovementStrategy : public UObject
 {
 	GENERATED_BODY()

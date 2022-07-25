@@ -6,10 +6,10 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "CDC/Movement/Strategies/CDefaultMovementStrategy.h"
+#include "CDC/Movement/Mediators/ActionEventMediator.h"
 
 ACPlayerCharacter::ACPlayerCharacter() : ACCharacter()
 {
-	//Create Actin Event Mediator object
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Boom"));
 	SpringArm->SetupAttachment(RootComponent);
 	SpringArm->TargetArmLength = 800.0f;
@@ -19,13 +19,28 @@ ACPlayerCharacter::ACPlayerCharacter() : ACCharacter()
 	Camera->SetupAttachment(SpringArm);
 	Camera->FieldOfView = 110.0f;
 
-	MovementStrategy = CreateDefaultSubobject<UCDefaultMovementStrategy>("Default Movement Strategy");
-	if(MovementStrategy)
-		UE_LOG(LogTemp, Warning, TEXT("Movement strategy is valid. C"))
+	
+}
+
+void ACPlayerCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	if (InitialMovementStrategyClass)
+	{
+		MovementStrategy = NewObject<UCMovementStrategy>(this, InitialMovementStrategyClass);
+	}
 	else
-		UE_LOG(LogTemp, Warning, TEXT("Movement strategy isn't valid. C"));
+	{
+		MovementStrategy = NewObject<UCDefaultMovementStrategy>(this);
+#ifdef WITH_EDITOR
+		UE_LOG(LogTemp,Warning,TEXT("Movement strategy class isn't valid. It assumed default"))
+#endif // WITH_EDITOR
+	}
+		
+	EventMediator = NewObject<UActionEventMediator>(this);
 
 }
+
 
 void ACPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -45,20 +60,29 @@ void ACPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 void ACPlayerCharacter::ChangeMovementStrategy(UCMovementStrategy* const NewStrategy)
 {
-	//
+	if (NewStrategy)
+	{
+		if (MovementStrategy)
+			MovementStrategy->MarkAsGarbage();
+		MovementStrategy = NewStrategy;
+	}
+#ifdef WITH_EDITOR
+	else
+		UE_LOG(LogTemp,Warning,TEXT("Movement Strategy couldn't be changed, new strategy is null."))
+#endif // WITH_EDITOR
+
 }
 
 void ACPlayerCharacter::Forward(float AxisValue)
 {
 	//Delegate work to the strategy.
-	if (MovementStrategy) MovementStrategy->Forward(AxisValue);
-	else UE_LOG(LogTemp,Warning,TEXT("Movement strategy isn't valid."))
+	if (MovementStrategy && !bBlockWalking) MovementStrategy->Forward(AxisValue);
 }
 
 void ACPlayerCharacter::Right(float AxisValue)
 {
-	//Delegate work to the strategy.q
-	if (MovementStrategy) MovementStrategy->Right(AxisValue);
+	//Delegate work to the strategy.
+	if (MovementStrategy && !bBlockWalking) MovementStrategy->Right(AxisValue);
 }
 
 void ACPlayerCharacter::MouseX(float AxisValue)
@@ -74,7 +98,7 @@ void ACPlayerCharacter::MouseY(float AxisValue)
 void ACPlayerCharacter::RunPressed()
 {
 	//Delegate work to the strategy.
-	if (MovementStrategy) MovementStrategy->RunPressed();
+	if (MovementStrategy && !bBlockRunning) MovementStrategy->RunPressed();
 }
 
 void ACPlayerCharacter::RunReleased()

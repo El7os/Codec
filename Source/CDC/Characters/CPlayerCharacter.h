@@ -18,9 +18,24 @@ public:
 
 	ACPlayerCharacter();
 
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	virtual void PostInitializeComponents() override;
+
+	UFUNCTION(BlueprintCallable)
 	void ChangeMovementStrategy(class UCMovementStrategy* const NewStrategy);
 
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	UFUNCTION()
+	FORCEINLINE void SetBlockAllMovement(bool BlockMovement) {bBlockWalking = bBlockRunning = bBlockEvade = BlockMovement;}
+
+	UFUNCTION()
+	FORCEINLINE void SetBlockWalkingOnly(bool BlockWalking) {bBlockWalking = BlockWalking;}
+
+	UFUNCTION()
+	FORCEINLINE void SetBlockRunningOnly(bool BlockRunning) { bBlockRunning = BlockRunning; RunReleased(); }
+
+	UFUNCTION()
+	FORCEINLINE void SetBlockEvadeOnly(bool BlockEvade) {bBlockEvade = BlockEvade;}
 
 private:
 
@@ -45,12 +60,14 @@ private:
 	UFUNCTION()
 	void Evade();
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UCMovementStrategy> InitialMovementStrategyClass;
+
 	UPROPERTY()
 	class UCMovementStrategy* MovementStrategy = nullptr;
-
-	/*
-	UPROPERTY()
-	class UActionEventMediator* EventMediator = nullptr;*/
+	
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UActionEventMediator* EventMediator = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* Camera = nullptr;
@@ -58,4 +75,12 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* SpringArm = nullptr;
 
+	UPROPERTY()
+	bool bBlockWalking = false;
+
+	UPROPERTY()
+	bool bBlockRunning = false;
+
+	UPROPERTY()
+	bool bBlockEvade = false;
 };
