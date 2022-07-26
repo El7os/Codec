@@ -5,6 +5,7 @@
 
 #include "CDC/Characters/CPlayerCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "CDC/GameplayAbilities/Locomotion/CEvadeAbility.h"
 #include "CDC/GameplayAbilities/Locomotion/CSlideAbility.h"
 #include "AbilitySystemComponent.h"
@@ -21,10 +22,7 @@ void UCDefaultMovementStrategy::PostInitProperties()
 
 	if (Owner)
 	{
-		if (bAutoAdjustSpeed && Owner->GetCharacterMovement())
-		{
-			Owner->GetCharacterMovement()->MaxWalkSpeed = CharacterSpeed;
-		}
+		SetCharacterMovementProperties();
 		OwnerCombatComponent = Owner->GetAbilitySystemComponent();
 		if (OwnerCombatComponent)
 		{
@@ -40,30 +38,45 @@ void UCDefaultMovementStrategy::PostInitProperties()
 	}
 }
 
+void UCDefaultMovementStrategy::SetCharacterMovementProperties()
+{
+	UCharacterMovementComponent* MovementComp = Owner->GetCharacterMovement();
+	if (MovementComp)
+	{
+		MovementComp->bOrientRotationToMovement = true;
+		MovementComp->MaxAcceleration = 1000.0f;
+
+		if (bAutoAdjustSpeed)
+		{
+			MovementComp->MaxWalkSpeed = CharacterSpeed;
+		}
+
+	}
+
+	Owner->GetSpringArm()->bUsePawnControlRotation = false;
+	Owner->GetSpringArm()->bInheritPitch = false;
+	Owner->GetSpringArm()->bInheritRoll = false;
+	Owner->GetSpringArm()->bInheritYaw = false;
+}
+
 void UCDefaultMovementStrategy::Forward(float AxisValue)
 {
 	if (!AxisValue) return;
 
-	if (Owner && Owner->Controller)
+	if (Owner)
 	{
-		const FVector Direction = FRotationMatrix(Owner->Controller->GetControlRotation()).GetScaledAxis(EAxis::X);
-		Owner->AddMovementInput(Direction, AxisValue);
+		Owner->AddMovementInput(FVector(1.f, 0.f, 0.f), AxisValue);
 	}
-	else
-		UE_LOG(LogTemp, Warning, TEXT("Controller can't be reached"));
 }
 
 void UCDefaultMovementStrategy::Right(float AxisValue)
 {
 	if (!AxisValue) return;
 
-	if (Owner && Owner->Controller)
+	if (Owner)
 	{
-		const FVector Direction = FRotationMatrix(Owner->Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);
-		Owner->AddMovementInput(Direction, AxisValue);
+		Owner->AddMovementInput(FVector(0.f, 1.f, 0.f), AxisValue);
 	}
-	else
-		UE_LOG(LogTemp, Warning, TEXT("Controller can't be reached"));
 	
 }
 
@@ -91,6 +104,7 @@ void UCDefaultMovementStrategy::RunPressed()
 
 void UCDefaultMovementStrategy::RunReleased()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Run released"));
 	if (Owner && Owner->GetCharacterMovement())
 	{
 		switch (AccelerationType)

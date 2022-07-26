@@ -120,6 +120,7 @@ void ACPlayerCharacter::MouseY(float AxisValue)
 void ACPlayerCharacter::RunPressed()
 {
 	//Delegate work to the strategy.
+	if (EventMediator) EventMediator->Notify(this, 1, ActionEventMediator::Notification::BlockAllInput);
 	if (MovementStrategy && !bBlockRunning) MovementStrategy->RunPressed();
 }
 
@@ -131,6 +132,7 @@ void ACPlayerCharacter::RunReleased()
 
 void ACPlayerCharacter::Evade()
 {
-	//Delegate work to the strategy.
-	if (MovementStrategy) MovementStrategy->Evade();
+	//Delegate work to the strategy
+	if (EventMediator) EventMediator->Notify(this, 1, ActionEventMediator::Notification::UnBlockAllInput);
+	if (MovementStrategy && !bBlockEvade) MovementStrategy->Evade();
 }

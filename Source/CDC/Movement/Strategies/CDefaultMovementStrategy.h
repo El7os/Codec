@@ -34,6 +34,9 @@ public:
 
 private:
 
+	UFUNCTION()
+	void SetCharacterMovementProperties();
+
 	UPROPERTY()
 	class UAbilitySystemComponent* OwnerCombatComponent = nullptr;
 

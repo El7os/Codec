@@ -38,6 +38,19 @@ public:
 
 	UFUNCTION()
 	FORCEINLINE void SetBlockEvadeOnly(bool BlockEvade) {bBlockEvade = BlockEvade;}
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE USpringArmComponent* const GetSpringArm() { return SpringArm;}
+
+	UPROPERTY()
+	bool bBlockWalking = false;
+
+	UPROPERTY()
+	bool bBlockRunning = false;
+
+	UPROPERTY()
+	bool bBlockEvade = false;
+
 protected:
 
 	void BeginPlay() override;
@@ -83,12 +96,4 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	class UCCombatComponent* CombatComponent = nullptr;
 
-	UPROPERTY()
-	bool bBlockWalking = false;
-
-	UPROPERTY()
-	bool bBlockRunning = false;
-
-	UPROPERTY()
-	bool bBlockEvade = false;
 };

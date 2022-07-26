@@ -10,7 +10,7 @@ UActionEventMediator::UActionEventMediator() : UObject()
 	PlayerCharacter = Cast<ACPlayerCharacter>(GetOuter());
 }
 
-void UActionEventMediator::SetCharacter(ACPlayerCharacter* const OUT OutPlayerCharacter)
+void UActionEventMediator::SetCharacter(ACPlayerCharacter* const OutPlayerCharacter)
 {
 	if (OutPlayerCharacter)
 	{
@@ -22,7 +22,7 @@ void UActionEventMediator::SetCharacter(ACPlayerCharacter* const OUT OutPlayerCh
 #endif // WITH_EDITOR
 }
 
-void UActionEventMediator::SetComponent(UCCombatComponent* const OUT OutComponent)
+void UActionEventMediator::SetComponent(UCCombatComponent* const OutComponent)
 {
 	if (OutComponent)
 	{
@@ -34,7 +34,139 @@ void UActionEventMediator::SetComponent(UCCombatComponent* const OUT OutComponen
 #endif
 }
 
-void UActionEventMediator::Notify(UObject* const Sender, const FString& Event)
+void UActionEventMediator::Notify(UObject* const Sender, int num, ...)
 {
-	//Extract operations by using Sender and Event; 
+
+	using ENotification = ActionEventMediator::Notification;
+
+	va_list VarList;
+	va_start(VarList, num);
+
+
+	for (int i = 0; i < num; i++)
+	{
+		switch (va_arg(VarList,TEnumAsByte<ENotification>))
+		{
+		case ENotification::BlockAllInput:
+
+			SetBlockMovement(true);
+			SetBlockWeapon(true,false);
+
+			break;
+		case ENotification::BlockAllInputByForce:
+
+			SetBlockMovement(true);
+			SetBlockWeapon(true, true);
+
+			break;
+		case ENotification::BlockMovementOnly:
+
+			SetBlockMovement(true);
+		
+			break;
+		case ENotification::BlockWeaponOnly:
+
+			SetBlockWeapon(true, false);
+
+			break;
+		case ENotification::BlockWalkingOnly:
+
+			SetBlockWalking(true);
+
+			break;
+		case ENotification::BlockRunningOnly:
+
+			SetBlockRunning(true);
+
+			break;
+		case ENotification::BlockEvadeOnly:
+
+			SetBlockEvade(true);
+
+			break;
+		case ENotification::BlockSlideOnly:
+
+			SetBlockSlide(true);
+
+			break;
+		case ENotification::BlockWeaponOnlyByForce:
+
+			SetBlockWeapon(true, true);
+
+			break;
+		case ENotification::UnBlockAllInput:
+
+			SetBlockMovement(false);
+			SetBlockWeapon(false, false);
+
+			break;
+		case ENotification::UnBlockMovementOnly:
+
+			SetBlockMovement(false);
+
+			break;
+		case ENotification::UnBlockWeaponOnly:
+
+			SetBlockWeapon(false, false);
+
+			break;
+		case ENotification::UnBlockWalkingOnly:
+
+			SetBlockWalking(false);
+
+			break;
+		case ENotification::UnBlockRunningOnly:
+
+			SetBlockRunning(false);
+
+			break;
+		case ENotification::UnBlockEvadeOnly:
+
+			SetBlockEvade(false);
+
+			break;
+		case ENotification::UnBlockSlideOnly:
+
+			SetBlockSlide(false);
+
+			break;
+		}
+	}
+	va_end(VarList);
+}
+
+void UActionEventMediator::SetBlockMovement(bool Block)
+{
+	SetBlockRunning(Block);
+	SetBlockEvade(Block);
+	SetBlockWalking(Block);
+	SetBlockSlide(Block);
+	//if Weapon is valid, block it.
+}
+
+void UActionEventMediator::SetBlockRunning(bool Block)
+{
+	if (PlayerCharacter)
+		PlayerCharacter->SetBlockRunningOnly(Block);
+}
+
+void UActionEventMediator::SetBlockSlide(bool Block)
+{
+}
+
+void UActionEventMediator::SetBlockWeapon(bool Block, bool ByForce)
+{
+	//if Weapon is valid, block it.
+}
+
+void UActionEventMediator::SetBlockEvade(bool Block)
+{
+	if (PlayerCharacter)
+		PlayerCharacter->bBlockEvade = Block;
+}
+
+void UActionEventMediator::SetBlockWalking(bool Block)
+{
+	if (PlayerCharacter)
+		PlayerCharacter->bBlockWalking = Block;
 }
