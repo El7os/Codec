@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "CDC/Movement/Strategies/CMovementStrategy.h"
+#include "Abilities/GameplayAbilityTypes.h"
 #include "CDefaultMovementStrategy.generated.h"
 
 /**
@@ -33,12 +34,36 @@ public:
 
 private:
 
+	UPROPERTY()
+	class UAbilitySystemComponent* OwnerCombatComponent = nullptr;
+
 	/*
 		It represents the calculation type of the additional speed when the player character runs
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true", Category = "Movement|Run", ExposeOnSpawn = "true"))
 	TEnumAsByte<EAccelerationType> AccelerationType = EAccelerationType::Fixed;
 	
+	/*
+	* A gameplay ability class makes the player evade. 
+	* (It must be a subclass of CEvadeAbility)
+	*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", Category = "Movement|Evade"))
+	TSubclassOf<class UCEvadeAbility> EvadeAbilityClass;
+
+	/*
+	* A gameplay ability class that makes the player slide on the ground.
+	* In order for player to slide on groud, the player must evade while running. 
+	* (It must be a subclass of CSladeAbility)
+	*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "trye", Category = "Movement|Slide"))
+	TSubclassOf<class UCSlideAbility> SlideAbilityClass;
+
+	UPROPERTY()
+	FGameplayAbilitySpecHandle EvadeSpecHandle;
+	
+	UPROPERTY()
+	FGameplayAbilitySpecHandle SlideSpecHandle;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true", InlineEditConditionToggle, Category = "Movement|Walk",ExposeOnSpawn = "true"))
 	bool bAutoAdjustSpeed = true;
 
@@ -61,9 +86,16 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true", Category = "Movement|Run", ExposeOnSpawn = "true", EditCondition = "AccelerationType==EAccelerationType::ByPrecent"))
 	float AdditionalPercent = 20.0f;
 
+
 	/*
 		The added speed amount when the player runs. It only valids if the player is accelerating by percent. 
 	*/
 	UPROPERTY()
 	float SpeedContribution = 0.0f;
+
+	UPROPERTY()
+	bool bIsRunning = false;
+
+
+	
 };

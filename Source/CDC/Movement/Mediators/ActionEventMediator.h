@@ -21,7 +21,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetCharacter(class ACPlayerCharacter* const OutPlayerCharacter);
 
-	/*void SetComponent(class UCombatComponent* const Component);*/
+	UFUNCTION(BlueprintCallable)
+	void SetComponent(class UCCombatComponent* const Component);
 
 	//void SetWeapon(class ACPlayerWeapon* const PlayerWeapon);
 	
@@ -32,7 +33,7 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	class ACPlayerCharacter* PlayerCharacter;
 
-	/*class UCombatComponent* Component;*/
+	class UCCombatComponent* Component;
 
 	//class ACPlayerWeapon* PlayerWeapon;
 };

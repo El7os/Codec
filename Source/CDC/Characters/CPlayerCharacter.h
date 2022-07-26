@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "CDC/Characters/CCharacter.h"
+#include "AbilitySystemInterface.h"
 #include "CPlayerCharacter.generated.h"
-
 /**
  * 
  */
 UCLASS()
-class CDC_API ACPlayerCharacter : public ACCharacter
+class CDC_API ACPlayerCharacter : public ACCharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 	
@@ -21,6 +21,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual void PostInitializeComponents() override;
+
+	virtual class UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	UFUNCTION(BlueprintCallable)
 	void ChangeMovementStrategy(class UCMovementStrategy* const NewStrategy);
@@ -36,6 +38,9 @@ public:
 
 	UFUNCTION()
 	FORCEINLINE void SetBlockEvadeOnly(bool BlockEvade) {bBlockEvade = BlockEvade;}
+protected:
+
+	void BeginPlay() override;
 
 private:
 
@@ -74,6 +79,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* SpringArm = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	class UCCombatComponent* CombatComponent = nullptr;
 
 	UPROPERTY()
 	bool bBlockWalking = false;

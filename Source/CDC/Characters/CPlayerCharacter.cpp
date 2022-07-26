@@ -7,6 +7,7 @@
 #include "Camera/CameraComponent.h"
 #include "CDC/Movement/Strategies/CDefaultMovementStrategy.h"
 #include "CDC/Movement/Mediators/ActionEventMediator.h"
+#include "CDC/Components/CCombatComponent.h"
 
 ACPlayerCharacter::ACPlayerCharacter() : ACCharacter()
 {
@@ -19,7 +20,7 @@ ACPlayerCharacter::ACPlayerCharacter() : ACCharacter()
 	Camera->SetupAttachment(SpringArm);
 	Camera->FieldOfView = 110.0f;
 
-	
+	CombatComponent = CreateDefaultSubobject<UCCombatComponent>(TEXT("Combat Component"));
 }
 
 void ACPlayerCharacter::PostInitializeComponents()
@@ -38,7 +39,28 @@ void ACPlayerCharacter::PostInitializeComponents()
 	}
 		
 	EventMediator = NewObject<UActionEventMediator>(this);
+}
 
+void ACPlayerCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (CombatComponent)
+		CombatComponent->InitAbilityActorInfo(this, this);
+#ifdef WITH_EDITOR
+	else
+		UE_LOG(LogTemp, Warning, TEXT("Ability System Component is null (%s)"), *GetName());
+#endif
+
+	if (EventMediator)
+	{
+		EventMediator->SetComponent(CombatComponent);
+	}
+}
+
+UAbilitySystemComponent* ACPlayerCharacter::GetAbilitySystemComponent() const
+{
+	return CombatComponent;
 }
 
 

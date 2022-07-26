@@ -5,6 +5,9 @@
 
 #include "CDC/Characters/CPlayerCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "CDC/GameplayAbilities/Locomotion/CEvadeAbility.h"
+#include "CDC/GameplayAbilities/Locomotion/CSlideAbility.h"
+#include "AbilitySystemComponent.h"
 
 
 UCDefaultMovementStrategy::UCDefaultMovementStrategy()
@@ -16,8 +19,25 @@ void UCDefaultMovementStrategy::PostInitProperties()
 {
 	Super::PostInitProperties();
 
-	if (bAutoAdjustSpeed && Owner && Owner->GetCharacterMovement())
-		Owner->GetCharacterMovement()->MaxWalkSpeed = CharacterSpeed;
+	if (Owner)
+	{
+		if (bAutoAdjustSpeed && Owner->GetCharacterMovement())
+		{
+			Owner->GetCharacterMovement()->MaxWalkSpeed = CharacterSpeed;
+		}
+		OwnerCombatComponent = Owner->GetAbilitySystemComponent();
+		if (OwnerCombatComponent)
+		{
+			EvadeSpecHandle = OwnerCombatComponent->GiveAbility(FGameplayAbilitySpec(EvadeAbilityClass, 1, -1, this));
+
+			SlideSpecHandle = OwnerCombatComponent->GiveAbility(FGameplayAbilitySpec(SlideAbilityClass, 1, -1, this));
+		}
+#if WITH_EDITOR
+		else
+			UE_LOG(LogTemp,Warning,TEXT("Owner's ability system component could not be reached Source:(%s), Owner(%s)"),*GetName(), *Owner->GetName())
+#endif
+			
+	}
 }
 
 void UCDefaultMovementStrategy::Forward(float AxisValue)
@@ -64,10 +84,8 @@ void UCDefaultMovementStrategy::RunPressed()
 			Owner->GetCharacterMovement()->MaxWalkSpeed += AdditionalSpeed;
 			
 			break;
-
-		default:
-			break;
 		}
+		bIsRunning = true;
 	}
 }
 
@@ -92,11 +110,17 @@ void UCDefaultMovementStrategy::RunReleased()
 		default:
 			break;
 		}
+		bIsRunning = false;
 	}
 
 }
 
 void UCDefaultMovementStrategy::Evade()
 {
-	UE_LOG(LogTemp, Display, TEXT("Evade input has been handled."))
+	if (OwnerCombatComponent)
+		bIsRunning ? OwnerCombatComponent->TryActivateAbility(SlideSpecHandle) : OwnerCombatComponent->TryActivateAbility(EvadeSpecHandle);
+#if WITH_EDITOR
+	else
+		UE_LOG(LogTemp,Warning, TEXT("Evade cannot be executed, Owner's comba component is null Source(%s)"), *GetName())
+#endif
 }
