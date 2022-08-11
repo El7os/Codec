@@ -25,11 +25,11 @@ public:
 
 	void Right(float AxisValue) override;
 
-	void RunPressed() override;
+	void Action1Pressed() override;
 
-	void RunReleased() override;
+	void Action1Released() override;
 
-	void Evade() override;
+	void Action2Pressed() override;
 
 
 private:

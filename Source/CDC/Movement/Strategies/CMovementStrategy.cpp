@@ -9,4 +9,8 @@ UCMovementStrategy::UCMovementStrategy()
 	: UObject()
 {
 	Owner = Cast<ACPlayerCharacter>(GetOuter());
+	if (Owner)
+	{
+		InputMediator = Owner->GetInputMediator();
+	}
 }

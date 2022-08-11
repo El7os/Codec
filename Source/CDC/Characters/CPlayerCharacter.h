@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "CDC/Characters/CCharacter.h"
 #include "AbilitySystemInterface.h"
+#include "GameplayTagContainer.h"
 #include "CPlayerCharacter.generated.h"
 /**
  * 
@@ -27,29 +28,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ChangeMovementStrategy(class UCMovementStrategy* const NewStrategy);
 
-	UFUNCTION()
-	FORCEINLINE void SetBlockAllMovement(bool BlockMovement) {bBlockWalking = bBlockRunning = bBlockEvade = BlockMovement;}
-
-	UFUNCTION()
-	FORCEINLINE void SetBlockWalkingOnly(bool BlockWalking) {bBlockWalking = BlockWalking;}
-
-	UFUNCTION()
-	FORCEINLINE void SetBlockRunningOnly(bool BlockRunning) { bBlockRunning = BlockRunning; RunReleased(); }
-
-	UFUNCTION()
-	FORCEINLINE void SetBlockEvadeOnly(bool BlockEvade) {bBlockEvade = BlockEvade;}
-
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE USpringArmComponent* const GetSpringArm() { return SpringArm;}
 
-	UPROPERTY()
-	bool bBlockWalking = false;
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE UInputMediator* const GetInputMediator() { return InputMediator; }
 
-	UPROPERTY()
-	bool bBlockRunning = false;
-
-	UPROPERTY()
-	bool bBlockEvade = false;
 
 protected:
 
@@ -70,22 +54,19 @@ private:
 	void MouseY(float AxisValue);
 
 	UFUNCTION()
-	void RunPressed();
+	void Action1Pressed();
 
 	UFUNCTION()
-	void RunReleased();
+	void Action1Released();
 
 	UFUNCTION()
-	void Evade();
+	void Action2Pressed();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class UCMovementStrategy> InitialMovementStrategyClass;
 
 	UPROPERTY()
 	class UCMovementStrategy* MovementStrategy = nullptr;
-	
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UActionEventMediator* EventMediator = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* Camera = nullptr;
@@ -96,4 +77,26 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	class UCCombatComponent* CombatComponent = nullptr;
 
+	UPROPERTY()
+	class UInputMediator* InputMediator = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input",meta = (AllowPrivateAccess = "true"))
+	FGameplayTag ForwardAxisBlockerTag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input",meta = (AllowPrivateAccess = "true"))
+	FGameplayTag RightAxisBlockerTag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input",meta = (AllowPrivateAccess = "true"))
+	FGameplayTag Action1BlockerTag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input",meta = (AllowPrivateAccess = "true"))
+	FGameplayTag Action2BlockerTag;
+	
+	//Test
+
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	class UInputAction* ForwardInputAction = nullptr;*/
+
 };
+
+

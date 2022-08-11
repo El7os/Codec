@@ -10,6 +10,12 @@
  * 
  */
 
+/*
+	Bu ve daha sonraki mediatorlerin kullanacaðý enum
+	sýnýflarý Movement adlý bir namespace içerisinde
+	daha düzenli olarak tutulabilir.
+
+*/
 UENUM()
 enum EAccelerationType
 {
@@ -18,7 +24,7 @@ enum EAccelerationType
 };
 
 
-UCLASS(Blueprintable)
+UCLASS(Blueprintable, Abstract)
 class CDC_API UCMovementStrategy : public UObject
 {
 	GENERATED_BODY()
@@ -35,14 +41,17 @@ public:
 
 	virtual void MouseY(float AxisValue) {};
 
-	virtual void RunPressed() {};
+	virtual void Action1Pressed() {};
 
-	virtual void RunReleased() {};
+	virtual void Action1Released() {};
 
-	virtual void Evade() {};
-
+	virtual void Action2Pressed() {};
 
 protected:
 
+	UPROPERTY()
 	class ACPlayerCharacter* Owner = nullptr;
+
+	UPROPERTY()
+	class UInputMediator* InputMediator = nullptr;
 };

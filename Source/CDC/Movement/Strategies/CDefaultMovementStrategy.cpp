@@ -80,7 +80,7 @@ void UCDefaultMovementStrategy::Right(float AxisValue)
 	
 }
 
-void UCDefaultMovementStrategy::RunPressed()
+void UCDefaultMovementStrategy::Action1Pressed()
 {
 	if (Owner && Owner->GetCharacterMovement())
 	{
@@ -102,9 +102,8 @@ void UCDefaultMovementStrategy::RunPressed()
 	}
 }
 
-void UCDefaultMovementStrategy::RunReleased()
+void UCDefaultMovementStrategy::Action1Released()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Run released"));
 	if (Owner && Owner->GetCharacterMovement())
 	{
 		switch (AccelerationType)
@@ -129,12 +128,8 @@ void UCDefaultMovementStrategy::RunReleased()
 
 }
 
-void UCDefaultMovementStrategy::Evade()
+void UCDefaultMovementStrategy::Action2Pressed()
 {
 	if (OwnerCombatComponent)
 		bIsRunning ? OwnerCombatComponent->TryActivateAbility(SlideSpecHandle) : OwnerCombatComponent->TryActivateAbility(EvadeSpecHandle);
-#if WITH_EDITOR
-	else
-		UE_LOG(LogTemp,Warning, TEXT("Evade cannot be executed, Owner's comba component is null Source(%s)"), *GetName())
-#endif
 }

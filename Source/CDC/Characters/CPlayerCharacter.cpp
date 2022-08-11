@@ -6,8 +6,12 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "CDC/Movement/Strategies/CDefaultMovementStrategy.h"
-#include "CDC/Movement/Mediators/ActionEventMediator.h"
+#include "CDC/Movement/Mediators/InputMediator.h"
 #include "CDC/Components/CCombatComponent.h"
+
+//#include "InputAction.h"
+
+
 
 ACPlayerCharacter::ACPlayerCharacter() : ACCharacter()
 {
@@ -37,8 +41,9 @@ void ACPlayerCharacter::PostInitializeComponents()
 		UE_LOG(LogTemp,Warning,TEXT("Movement strategy class isn't valid. It assumed default"))
 #endif // WITH_EDITOR
 	}
+
+	
 		
-	EventMediator = NewObject<UActionEventMediator>(this);
 }
 
 void ACPlayerCharacter::BeginPlay()
@@ -52,17 +57,13 @@ void ACPlayerCharacter::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("Ability System Component is null (%s)"), *GetName());
 #endif
 
-	if (EventMediator)
-	{
-		EventMediator->SetComponent(CombatComponent);
-	}
+	InputMediator = GetGameInstance()->GetSubsystem<UInputMediator>();
 }
 
 UAbilitySystemComponent* ACPlayerCharacter::GetAbilitySystemComponent() const
 {
 	return CombatComponent;
 }
-
 
 void ACPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -72,12 +73,16 @@ void ACPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	PlayerInputComponent->BindAxis(TEXT("Forward"), this, &ACPlayerCharacter::Forward);
 	PlayerInputComponent->BindAxis(TEXT("Right"), this, &ACPlayerCharacter::Right);
+
+
+
+
 	PlayerInputComponent->BindAxis(TEXT("MouseX"), this, &ACPlayerCharacter::MouseX);
 	PlayerInputComponent->BindAxis(TEXT("MouseY"), this, &ACPlayerCharacter::MouseY);
 
-	PlayerInputComponent->BindAction(TEXT("Run"), IE_Pressed, this, &ACPlayerCharacter::RunPressed);
-	PlayerInputComponent->BindAction(TEXT("Run"), IE_Released, this, &ACPlayerCharacter::RunReleased);
-	PlayerInputComponent->BindAction(TEXT("Evade"), IE_Pressed, this, &ACPlayerCharacter::Evade);
+	PlayerInputComponent->BindAction(TEXT("Action1"), IE_Pressed, this, &ACPlayerCharacter::Action1Pressed);
+	PlayerInputComponent->BindAction(TEXT("Action1"), IE_Released, this, &ACPlayerCharacter::Action1Released);
+	PlayerInputComponent->BindAction(TEXT("Action2"), IE_Pressed, this, &ACPlayerCharacter::Action2Pressed);
 }
 
 void ACPlayerCharacter::ChangeMovementStrategy(UCMovementStrategy* const NewStrategy)
@@ -98,13 +103,14 @@ void ACPlayerCharacter::ChangeMovementStrategy(UCMovementStrategy* const NewStra
 void ACPlayerCharacter::Forward(float AxisValue)
 {
 	//Delegate work to the strategy.
-	if (MovementStrategy && !bBlockWalking) MovementStrategy->Forward(AxisValue);
+	if (MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(ForwardAxisBlockerTag))
+		MovementStrategy->Forward(AxisValue);
 }
 
 void ACPlayerCharacter::Right(float AxisValue)
 {
-	//Delegate work to the strategy.
-	if (MovementStrategy && !bBlockWalking) MovementStrategy->Right(AxisValue);
+	if (MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(RightAxisBlockerTag))
+		MovementStrategy->Right(AxisValue);
 }
 
 void ACPlayerCharacter::MouseX(float AxisValue)
@@ -117,22 +123,20 @@ void ACPlayerCharacter::MouseY(float AxisValue)
 	//Delegate work to the strategy.
 }
 
-void ACPlayerCharacter::RunPressed()
+void ACPlayerCharacter::Action1Pressed()
 {
-	//Delegate work to the strategy.
-	if (EventMediator) EventMediator->Notify(this, 1, ActionEventMediator::Notification::BlockAllInput);
-	if (MovementStrategy && !bBlockRunning) MovementStrategy->RunPressed();
+	if (MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(Action1BlockerTag))
+		MovementStrategy->Action1Pressed();
 }
 
-void ACPlayerCharacter::RunReleased()
+void ACPlayerCharacter::Action1Released()
 {
-	//Delegate work to the strategy.
-	if (MovementStrategy) MovementStrategy->RunReleased();
+	if (MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(Action1BlockerTag))
+		MovementStrategy->Action1Released();
 }
 
-void ACPlayerCharacter::Evade()
+void ACPlayerCharacter::Action2Pressed()
 {
-	//Delegate work to the strategy
-	if (EventMediator) EventMediator->Notify(this, 1, ActionEventMediator::Notification::UnBlockAllInput);
-	if (MovementStrategy && !bBlockEvade) MovementStrategy->Evade();
+	if (MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(Action2BlockerTag))
+		MovementStrategy->Action2Pressed();
 }
