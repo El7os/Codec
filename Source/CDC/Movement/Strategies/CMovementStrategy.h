@@ -28,13 +28,13 @@ UCLASS(Blueprintable, Abstract)
 class CDC_API UCMovementStrategy : public UObject
 {
 	GENERATED_BODY()
-	
+
 public:
 
 	UCMovementStrategy();
 
 	virtual void Forward(float AxisValue) {};
-	
+
 	virtual void Right(float AxisValue) {};
 
 	virtual void MouseX(float AxisValue) {};
@@ -46,6 +46,8 @@ public:
 	virtual void Action1Released() {};
 
 	virtual void Action2Pressed() {};
+
+	virtual void Action2Released() {};
 
 protected:
 

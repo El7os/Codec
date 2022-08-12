@@ -19,7 +19,8 @@ UCLASS(Abstract)
 class CDC_API AWeapon : public AActor
 {
 	GENERATED_BODY()
-	
+
+
 public:	
 	AWeapon();
 	
@@ -29,11 +30,12 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	virtual void Init() {};
+	virtual void Init(class UCCombatComponent* CombatComponenent) { Component = CombatComponenent; };
 
 	virtual void OnSelected() {};
 
 	virtual void OnUnselected(TEnumAsByte<UnselectReason> Reason) {};
 
+	class UCCombatComponent* Component;
 
 };

@@ -62,6 +62,9 @@ private:
 	UFUNCTION()
 	void Action2Pressed();
 
+	UFUNCTION()
+	void Action2Released();
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class UCMovementStrategy> InitialMovementStrategyClass;
 
@@ -81,21 +84,22 @@ private:
 	class UInputMediator* InputMediator = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input",meta = (AllowPrivateAccess = "true"))
-	FGameplayTag ForwardAxisBlockerTag;
+	FGameplayTag ForwardAxisInputBlockerTag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input",meta = (AllowPrivateAccess = "true"))
-	FGameplayTag RightAxisBlockerTag;
+	FGameplayTag RightAxisInputBlockerTag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input",meta = (AllowPrivateAccess = "true"))
-	FGameplayTag Action1BlockerTag;
+	FGameplayTag Action1InputBlockerTag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input",meta = (AllowPrivateAccess = "true"))
-	FGameplayTag Action2BlockerTag;
-	
-	//Test
+	FGameplayTag Action2InputBlockerTag;
 
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	class UInputAction* ForwardInputAction = nullptr;*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	FGameplayTag MouseXInputBlockerTag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	FGameplayTag MouseYInputBlockerTag;
 
 };
 

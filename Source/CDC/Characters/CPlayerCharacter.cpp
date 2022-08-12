@@ -9,11 +9,15 @@
 #include "CDC/Movement/Mediators/InputMediator.h"
 #include "CDC/Components/CCombatComponent.h"
 
-//#include "InputAction.h"
 
-
-
-ACPlayerCharacter::ACPlayerCharacter() : ACCharacter()
+ACPlayerCharacter::ACPlayerCharacter() 
+	: ACCharacter()
+	, ForwardAxisInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Forward")))
+	, RightAxisInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Right")))
+	, Action1InputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Action1")))
+	, Action2InputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Action2")))
+	, MouseXInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.MouseX")))
+	, MouseYInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.MouseY")))
 {
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Boom"));
 	SpringArm->SetupAttachment(RootComponent);
@@ -69,20 +73,16 @@ void ACPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	//These mappings will be changed with PlayerEnchancedInput system.
+	if (PlayerInputComponent)
+	{
+		PlayerInputComponent->BindAxis(TEXT("Forward"), this, &ACPlayerCharacter::Forward);
+		PlayerInputComponent->BindAxis(TEXT("Right"), this, &ACPlayerCharacter::Right);
+		PlayerInputComponent->BindAction(TEXT("Action1"), IE_Pressed, this, &ACPlayerCharacter::Action1Pressed);
+		PlayerInputComponent->BindAction(TEXT("Action1"), IE_Released, this, &ACPlayerCharacter::Action1Released);
+		PlayerInputComponent->BindAction(TEXT("Action2"), IE_Pressed, this, &ACPlayerCharacter::Action2Pressed);
+		PlayerInputComponent->BindAction(TEXT("Action2"), IE_Released, this, &ACPlayerCharacter::Action2Released);
 
-	PlayerInputComponent->BindAxis(TEXT("Forward"), this, &ACPlayerCharacter::Forward);
-	PlayerInputComponent->BindAxis(TEXT("Right"), this, &ACPlayerCharacter::Right);
-
-
-
-
-	PlayerInputComponent->BindAxis(TEXT("MouseX"), this, &ACPlayerCharacter::MouseX);
-	PlayerInputComponent->BindAxis(TEXT("MouseY"), this, &ACPlayerCharacter::MouseY);
-
-	PlayerInputComponent->BindAction(TEXT("Action1"), IE_Pressed, this, &ACPlayerCharacter::Action1Pressed);
-	PlayerInputComponent->BindAction(TEXT("Action1"), IE_Released, this, &ACPlayerCharacter::Action1Released);
-	PlayerInputComponent->BindAction(TEXT("Action2"), IE_Pressed, this, &ACPlayerCharacter::Action2Pressed);
+	}
 }
 
 void ACPlayerCharacter::ChangeMovementStrategy(UCMovementStrategy* const NewStrategy)
@@ -103,13 +103,13 @@ void ACPlayerCharacter::ChangeMovementStrategy(UCMovementStrategy* const NewStra
 void ACPlayerCharacter::Forward(float AxisValue)
 {
 	//Delegate work to the strategy.
-	if (MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(ForwardAxisBlockerTag))
+	if (MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(ForwardAxisInputBlockerTag))
 		MovementStrategy->Forward(AxisValue);
 }
 
 void ACPlayerCharacter::Right(float AxisValue)
 {
-	if (MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(RightAxisBlockerTag))
+	if (MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(RightAxisInputBlockerTag))
 		MovementStrategy->Right(AxisValue);
 }
 
@@ -125,18 +125,24 @@ void ACPlayerCharacter::MouseY(float AxisValue)
 
 void ACPlayerCharacter::Action1Pressed()
 {
-	if (MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(Action1BlockerTag))
+	if (MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(Action1InputBlockerTag))
 		MovementStrategy->Action1Pressed();
 }
 
 void ACPlayerCharacter::Action1Released()
 {
-	if (MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(Action1BlockerTag))
-		MovementStrategy->Action1Released();
+	if (MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(Action1InputBlockerTag))
+		MovementStrategy->Action1Released();	
 }
 
 void ACPlayerCharacter::Action2Pressed()
 {
-	if (MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(Action2BlockerTag))
+	if (MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(Action2InputBlockerTag))
 		MovementStrategy->Action2Pressed();
+}
+
+void ACPlayerCharacter::Action2Released()
+{
+	if(MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(Action2InputBlockerTag))
+		MovementStrategy->Action2Released();
 }
