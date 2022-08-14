@@ -6,9 +6,6 @@
 #include "CDC/GameplayAbilities/CGameplayAbility.h"
 #include "CEvadeAbility.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class CDC_API UCEvadeAbility : public UCGameplayAbility
 {

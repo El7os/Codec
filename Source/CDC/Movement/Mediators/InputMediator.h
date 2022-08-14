@@ -14,24 +14,32 @@ UCLASS()
 class CDC_API UInputMediator : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
-	
+	DECLARE_MULTICAST_DELEGATE(InputMediatorBroadcast);
+
+	/*
+		Belki sadece update edilen gameplay tag yayýn sýrasýnda gönderilebilir ve bu sayede kullanýcýlarýn bütün tagler arasýnda döngüye girmesine gerek kalmaz.
+	*/
 public:
 
 	UInputMediator();
 
+	UFUNCTION(BlueprintCallable)
+	void AddTag(const FGameplayTag& TagToAdd) { InputTags.AddTag(TagToAdd); MediatorUpdateBroadcast.Broadcast(); }
+
+	UFUNCTION(BlueprintCallable)
+	void RemoveTag(const FGameplayTag& TagToRemove) { InputTags.RemoveTag(TagToRemove); MediatorUpdateBroadcast.Broadcast(); }
+
 	//UFUNCTION(BlueprintCallable)
-	FORCEINLINE const FGameplayTagContainer& GetTags() { return InputTags; };
-
-	UFUNCTION(BlueprintCallable)
-	void AddTag(const FGameplayTag& TagToAdd) { InputTags.AddTag(TagToAdd); }
-
-	UFUNCTION(BlueprintCallable)
-	void RemoveTag(const FGameplayTag& TagToRemove) { InputTags.RemoveTag(TagToRemove); }
+	FORCEINLINE const FGameplayTagContainer& GetTags() { return InputTags; }
+	
+	InputMediatorBroadcast MediatorUpdateBroadcast;
 
 private:
 
 	UPROPERTY()
 	FGameplayTagContainer InputTags;
+
+	
 
 	
 };

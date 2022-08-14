@@ -4,45 +4,55 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-#include "InputActionValue.h"
-#include "CDC/Libraries/StructLibrary.h"
-#include "Kismet/GameplayStatics.h"
+#include "CDC/Libraries/StructuresLibrary.h"
+#include "GameplayTagContainer.h"
 #include "CPlayerController.generated.h"
 
 /**
  * 
  */
 USTRUCT()
-struct FInputExtractor
+struct FWeaponInputExtractor
 {
 
 	GENERATED_BODY()
 
-	UDELEGATE()
-	DECLARE_DELEGATE(NoParamInputActionDelegate);
-
-	UDELEGATE()
-	DECLARE_DELEGATE_OneParam(OneParamInputActionDelegate, float);
-
 public:
-	FInputExtractor()
+
+	UDELEGATE()
+	DECLARE_DELEGATE(NoParamInputActionDelegate)
+
+	UDELEGATE()
+	DECLARE_DELEGATE_OneParam(OneParamInputActionDelegate, float)
+
+	FWeaponInputExtractor()
 	{
 	}
 
-	FORCEINLINE void SetPlayerController(APlayerController* const PlayerController) { PC = PlayerController; }
-	FORCEINLINE void SetHoverStartThreshold(float NewValue) { HoverStartThreshold = NewValue >= 0.01f ? NewValue : HoverStartThreshold; }
-
+	
 	NoParamInputActionDelegate PressedDelegate;
+	
 	NoParamInputActionDelegate DelayedPressedDelegate;
+
 	NoParamInputActionDelegate ReleasedDelegate;
+
 	NoParamInputActionDelegate BeginHoverDelegate;
 
+	NoParamInputActionDelegate ForceToStopHoverDelegate;
+	
 	OneParamInputActionDelegate OnHoverDelegate;
+
 	OneParamInputActionDelegate EndHoverDelegate;
+
+	FORCEINLINE void SetPlayerController(APlayerController* const PlayerController) { PC = PlayerController; }
+
+	FORCEINLINE void SetHoverStartThreshold(float NewValue) { HoverStartThreshold = NewValue >= 0.01f ? NewValue : HoverStartThreshold; }
+
+	FORCEINLINE void SetBlockExtraction(bool bOutBlockExtraction) { bBlockExtraction = bBlockExtraction; }
 
 	void AxisEvent(float AxisValue) 
 	{
-		if (!AxisValue) return;
+		if (!AxisValue || bBlockExtraction) return;
 		if (!bIsInputTerminated)
 		{
 			if (Gate_1.CanPassThrough())
@@ -77,6 +87,7 @@ public:
 
 	void PressedEvent(FKey OUTKey)
 	{
+		if (bBlockExtraction) return;
 		Key = OUTKey;
 		HoverTime = 0.0f;
 		PressedDelegate.ExecuteIfBound();
@@ -85,6 +96,7 @@ public:
 
 	void ReleasedEvent()
 	{
+		if (bBlockExtraction) return;
 		if (!bIsInputTerminated)
 		{
 			Gate_1.CloseGate();
@@ -110,17 +122,33 @@ public:
 
 private:
 
+	UPROPERTY()
+	APlayerController* PC = nullptr;
 
+	UPROPERTY()
 	FDoOnce DoOnce_1;
+
+	UPROPERTY()
 	FDoOnce DoOnce_2;
+
+	UPROPERTY()
 	FGate Gate_1;
+
+	UPROPERTY()
 	FKey Key;
 	
+	UPROPERTY()
 	float HoverTime = 0.0f;
+
+	UPROPERTY()
 	float HoverStartThreshold = 0.3f;
+
+	UPROPERTY()
 	bool bIsInputTerminated = false;
 	
-	APlayerController* PC = nullptr;
+	UPROPERTY()
+	bool bBlockExtraction = false;
+
 };
 
 
@@ -128,36 +156,45 @@ UCLASS()
 class CDC_API ACPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
+
 public:
+	
+	DECLARE_DELEGATE(NoParamOnMediatorUpdateDelegate)
+
+
+	ACPlayerController();
 
 	UFUNCTION()
 	void BindWeapon(class APlayerWeapon* const Weapon);
 
 	UFUNCTION()
 	void UnbindWeapon(class APlayerWeapon* const Weapon);
-
+	
 protected:
 
 	virtual void SetupInputComponent() override;
 
+	virtual void BeginPlay() override;
+
 private:
 
+	UFUNCTION()
+	void OnInputMediatorUpdated();
 
 	UFUNCTION()
 	void PrimaryAxisFunc(float AxisValue) { PrimaryInputExtractor.AxisEvent(AxisValue); };
 
 	UFUNCTION()
-	void PrimaryActionPressedFunc(FKey Key) { PrimaryInputExtractor.PressedEvent(Key); };
+	void PrimaryActionPressedFunc(FKey Key) {  PrimaryInputExtractor.PressedEvent(Key); };
 
 	UFUNCTION()
-	void PrimaryActionReleasedFunc() { PrimaryInputExtractor.ReleasedEvent(); };
+	void PrimaryActionReleasedFunc() {  PrimaryInputExtractor.ReleasedEvent(); };
 
 	UFUNCTION()
 	void SecondaryAxisFunc(float AxisValue) { SecondaryInputExtractor.AxisEvent(AxisValue); };
 
 	UFUNCTION()
-	void SecondaryActionPressedFunc(FKey Key) { SecondaryInputExtractor.PressedEvent(Key); };
+	void SecondaryActionPressedFunc(FKey Key) {  SecondaryInputExtractor.PressedEvent(Key); };
 
 	UFUNCTION()
 	void SecondaryActionReleasedFunc() { SecondaryInputExtractor.ReleasedEvent(); };
@@ -181,14 +218,42 @@ private:
 	void QuaternaryActionReleasedFunc() { QuaternaryInputExtractor.ReleasedEvent(); };
 
 	UPROPERTY()
-	FInputExtractor PrimaryInputExtractor;
+	FWeaponInputExtractor PrimaryInputExtractor;
 
 	UPROPERTY()
-	FInputExtractor SecondaryInputExtractor;
+	FWeaponInputExtractor SecondaryInputExtractor;
 
 	UPROPERTY()
-	FInputExtractor TertiaryInputExtractor;
+	FWeaponInputExtractor TertiaryInputExtractor;
 
 	UPROPERTY()
-	FInputExtractor QuaternaryInputExtractor;
+	FWeaponInputExtractor QuaternaryInputExtractor;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
+	FGameplayTag PrimaryAbilityInputBlockerTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
+	FGameplayTag SecondaryAbilityInputBlockerTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
+	FGameplayTag TertiaryAbilityInputBlockerTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
+	FGameplayTag QuaternaryAbilityInputBlockerTag;
+
+	NoParamOnMediatorUpdateDelegate PrimaryAbilityBlockedDelegate;
+
+	NoParamOnMediatorUpdateDelegate SecondaryAbilityBlockedDelegate;
+
+	NoParamOnMediatorUpdateDelegate TertiaryAbilityBlockedDelegate;
+
+	NoParamOnMediatorUpdateDelegate QuaternaryAbilityBlockedDelegate;
+
+	bool bPrimaryAbilityBlocked = false;
+
+	bool bSecondaryAbilityBlocked = false;
+
+	bool bTertiaryAbilityBlocked = false;
+
+	bool bQuaternaryAbilityBlocked = false;
 };

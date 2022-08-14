@@ -6,18 +6,9 @@
 #include "AbilitySystemComponent.h"
 #include "CCombatComponent.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class CDC_API UCCombatComponent : public UAbilitySystemComponent
 {
 	GENERATED_BODY()
-
-public:
-
-
-private:
-
 	
 };

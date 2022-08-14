@@ -3,8 +3,18 @@
 
 #include "CDC/Controllers/CPlayerController.h"
 
+#include "CDC/Movement/Mediators/InputMediator.h"
 #include "CDC/Weapons/PlayerWeapons/PlayerWeapon.h"
 
+
+ACPlayerController::ACPlayerController()
+	: APlayerController()
+	, PrimaryAbilityInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Weapon.PrimaryAbility")))
+	, SecondaryAbilityInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Weapon.SecondaryAbility")))
+	, TertiaryAbilityInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Weapon.TertiaryAbility")))
+	, QuaternaryAbilityInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Weapon.QaternaryAbility")))
+{
+}
 
 void ACPlayerController::SetupInputComponent()
 {
@@ -36,6 +46,51 @@ void ACPlayerController::SetupInputComponent()
 
 }
 
+void ACPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (UInputMediator* InputMediator = GetGameInstance()->GetSubsystem<UInputMediator>())
+	{
+		InputMediator->MediatorUpdateBroadcast.AddUObject(this, &ACPlayerController::OnInputMediatorUpdated);
+	}
+}
+
+void ACPlayerController::OnInputMediatorUpdated()
+{
+	if (UInputMediator* InputMediator = GetGameInstance()->GetSubsystem<UInputMediator>())
+	{
+		bool CacheForPrimary = InputMediator->GetTags().HasTag(PrimaryAbilityInputBlockerTag);
+		bool CacheForSecondary = InputMediator->GetTags().HasTag(SecondaryAbilityInputBlockerTag);
+		bool CacheForTertiary = InputMediator->GetTags().HasTag(TertiaryAbilityInputBlockerTag);
+		bool CacheForQuaternary = InputMediator->GetTags().HasTag(QuaternaryAbilityInputBlockerTag);
+
+		if (CacheForPrimary && !bPrimaryAbilityBlocked)
+			PrimaryAbilityBlockedDelegate.ExecuteIfBound();
+
+		if (CacheForSecondary && !bSecondaryAbilityBlocked)
+			SecondaryAbilityBlockedDelegate.ExecuteIfBound();
+
+		if (CacheForTertiary && !bTertiaryAbilityBlocked)
+			TertiaryAbilityBlockedDelegate.ExecuteIfBound();
+
+		if (CacheForQuaternary && !bQuaternaryAbilityBlocked)
+			QuaternaryAbilityBlockedDelegate.ExecuteIfBound();
+
+		bPrimaryAbilityBlocked = CacheForPrimary;
+		bSecondaryAbilityBlocked = CacheForSecondary;
+		bTertiaryAbilityBlocked = CacheForTertiary;
+		bQuaternaryAbilityBlocked = CacheForQuaternary;
+
+		PrimaryInputExtractor.SetBlockExtraction(CacheForPrimary);
+		SecondaryInputExtractor.SetBlockExtraction(CacheForSecondary);
+		TertiaryInputExtractor.SetBlockExtraction(CacheForTertiary);
+		QuaternaryInputExtractor.SetBlockExtraction(CacheForQuaternary);
+
+	}
+	 
+}
+
 void ACPlayerController::BindWeapon(APlayerWeapon* const Weapon)
 {
 	if (Weapon)
@@ -46,7 +101,7 @@ void ACPlayerController::BindWeapon(APlayerWeapon* const Weapon)
 		PrimaryInputExtractor.OnHoverDelegate.BindUObject(Weapon, &APlayerWeapon::PrimaryOnHover);
 		PrimaryInputExtractor.EndHoverDelegate.BindUObject(Weapon, &APlayerWeapon::PrimaryEndHover);
 		PrimaryInputExtractor.ReleasedDelegate.BindUObject(Weapon, &APlayerWeapon::PrimaryReleased);
-
+		PrimaryAbilityBlockedDelegate.BindUObject(Weapon, &APlayerWeapon::OnPrimaryInputBlocked);
 
 		SecondaryInputExtractor.PressedDelegate.BindUObject(Weapon, &APlayerWeapon::SecondaryPressed);
 		SecondaryInputExtractor.DelayedPressedDelegate.BindUObject(Weapon, &APlayerWeapon::SecondaryDelayedPressed);
@@ -54,7 +109,7 @@ void ACPlayerController::BindWeapon(APlayerWeapon* const Weapon)
 		SecondaryInputExtractor.OnHoverDelegate.BindUObject(Weapon, &APlayerWeapon::SecondaryOnHover);
 		SecondaryInputExtractor.EndHoverDelegate.BindUObject(Weapon, &APlayerWeapon::SecondaryEndHover);
 		SecondaryInputExtractor.ReleasedDelegate.BindUObject(Weapon, &APlayerWeapon::SecondaryReleased);
-
+		SecondaryAbilityBlockedDelegate.BindUObject(Weapon, &APlayerWeapon::OnSecondaryInputBlocked);
 
 		TertiaryInputExtractor.PressedDelegate.BindUObject(Weapon, &APlayerWeapon::TertiaryPressed);
 		TertiaryInputExtractor.DelayedPressedDelegate.BindUObject(Weapon, &APlayerWeapon::TertiaryDelayedPressed);
@@ -62,7 +117,7 @@ void ACPlayerController::BindWeapon(APlayerWeapon* const Weapon)
 		TertiaryInputExtractor.OnHoverDelegate.BindUObject(Weapon, &APlayerWeapon::TertiaryOnHover);
 		TertiaryInputExtractor.EndHoverDelegate.BindUObject(Weapon, &APlayerWeapon::TertiaryEndHover);
 		TertiaryInputExtractor.ReleasedDelegate.BindUObject(Weapon, &APlayerWeapon::TertiaryReleased);
-
+		TertiaryAbilityBlockedDelegate.BindUObject(Weapon, &APlayerWeapon::OnTertiaryInputBlocked);
 
 		QuaternaryInputExtractor.PressedDelegate.BindUObject(Weapon, &APlayerWeapon::QuaternaryPressed);
 		QuaternaryInputExtractor.DelayedPressedDelegate.BindUObject(Weapon, &APlayerWeapon::QuaternaryDelayedPressed);
@@ -70,13 +125,13 @@ void ACPlayerController::BindWeapon(APlayerWeapon* const Weapon)
 		QuaternaryInputExtractor.OnHoverDelegate.BindUObject(Weapon, &APlayerWeapon::QuaternaryOnHover);
 		QuaternaryInputExtractor.EndHoverDelegate.BindUObject(Weapon, &APlayerWeapon::QuaternaryEndHover);
 		QuaternaryInputExtractor.ReleasedDelegate.BindUObject(Weapon, &APlayerWeapon::QuaternaryReleased);
+		QuaternaryAbilityBlockedDelegate.BindUObject(Weapon, &APlayerWeapon::OnQuaternaryInputBlocked);
 	}
 #if WITH_EDITOR
 	else
 		UE_LOG(LogTemp, Warning, TEXT("Weapon cannot be bounded, it is null %s"), __FUNCTION__);
 #endif
 }
-
 
 void ACPlayerController::UnbindWeapon(APlayerWeapon* const Weapon)
 {
@@ -88,7 +143,7 @@ void ACPlayerController::UnbindWeapon(APlayerWeapon* const Weapon)
 		PrimaryInputExtractor.OnHoverDelegate.Unbind();
 		PrimaryInputExtractor.EndHoverDelegate.Unbind();
 		PrimaryInputExtractor.ReleasedDelegate.Unbind();
-
+		PrimaryAbilityBlockedDelegate.Unbind();
 
 		SecondaryInputExtractor.PressedDelegate.Unbind();
 		SecondaryInputExtractor.DelayedPressedDelegate.Unbind();
@@ -96,6 +151,7 @@ void ACPlayerController::UnbindWeapon(APlayerWeapon* const Weapon)
 		SecondaryInputExtractor.OnHoverDelegate.Unbind();
 		SecondaryInputExtractor.EndHoverDelegate.Unbind();
 		SecondaryInputExtractor.ReleasedDelegate.Unbind();
+		SecondaryAbilityBlockedDelegate.Unbind();
 
 
 		TertiaryInputExtractor.PressedDelegate.Unbind();
@@ -104,6 +160,7 @@ void ACPlayerController::UnbindWeapon(APlayerWeapon* const Weapon)
 		TertiaryInputExtractor.OnHoverDelegate.Unbind();
 		TertiaryInputExtractor.EndHoverDelegate.Unbind();
 		TertiaryInputExtractor.ReleasedDelegate.Unbind();
+		TertiaryAbilityBlockedDelegate.Unbind();
 
 
 		QuaternaryInputExtractor.PressedDelegate.Unbind();
@@ -112,6 +169,7 @@ void ACPlayerController::UnbindWeapon(APlayerWeapon* const Weapon)
 		QuaternaryInputExtractor.OnHoverDelegate.Unbind();
 		QuaternaryInputExtractor.EndHoverDelegate.Unbind();
 		QuaternaryInputExtractor.ReleasedDelegate.Unbind();
+		QuaternaryAbilityBlockedDelegate.Unbind();
 	}
 #if WITH_EDITOR
 	else

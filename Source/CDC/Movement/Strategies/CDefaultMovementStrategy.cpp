@@ -6,13 +6,11 @@
 #include "CDC/Characters/CPlayerCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "CDC/GameplayAbilities/Locomotion/CEvadeAbility.h"
-#include "CDC/GameplayAbilities/Locomotion/CSlideAbility.h"
+#include "CDC/GameplayAbilities/CGameplayAbility.h"
 #include "AbilitySystemComponent.h"
 
 
-UCDefaultMovementStrategy::UCDefaultMovementStrategy()
-	: UCMovementStrategy()
+UCDefaultMovementStrategy::UCDefaultMovementStrategy() : UCMovementStrategy()
 {
 }
 
@@ -82,6 +80,14 @@ void UCDefaultMovementStrategy::Right(float AxisValue)
 
 void UCDefaultMovementStrategy::Action1Pressed()
 {
+	/*if (OwnerCombatComponent)
+	{
+		FGameplayEffectContextHandle EffectContext = OwnerCombatComponent->MakeEffectContext();
+		EffectContext.AddSourceObject(this);
+		FGameplayEffectSpecHandle EffectSpec = OwnerCombatComponent->MakeOutgoingSpec(RunningEffect, 1, EffectContext);
+		ActiveHandle = OwnerCombatComponent->ApplyGameplayEffectSpecToSelf(*EffectSpec.Data.Get());
+	}
+	return;*/
 	if (Owner && Owner->GetCharacterMovement())
 	{
 		switch (AccelerationType)
@@ -125,11 +131,17 @@ void UCDefaultMovementStrategy::Action1Released()
 		}
 		bIsRunning = false;
 	}
-
 }
 
 void UCDefaultMovementStrategy::Action2Pressed()
 {
 	if (OwnerCombatComponent)
 		bIsRunning ? OwnerCombatComponent->TryActivateAbility(SlideSpecHandle) : OwnerCombatComponent->TryActivateAbility(EvadeSpecHandle);
+}
+
+void UCDefaultMovementStrategy::ForceAction1ToStop()
+{
+	Super::ForceAction1ToStop();
+
+	Action1Released();
 }

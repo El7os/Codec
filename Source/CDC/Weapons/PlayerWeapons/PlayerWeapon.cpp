@@ -3,25 +3,24 @@
 
 #include "CDC/Weapons/PlayerWeapons/PlayerWeapon.h"
 
-
 #include "CDC/Components/CCombatComponent.h"
 #include "CDC/GameplayAbilities/CGameplayAbility.h"
 
 
-APlayerWeapon::APlayerWeapon()
-	: AWeapon()
-	, PrimaryAbilityInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Weapon.PrimaryAbility")))
-	, SecondaryAbilityInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Weapon.SecondaryAbility")))
-	, TertiaryAbilityInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Weapon.TertiaryAbility")))
-	, QuaternaryAbilityInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Weapon.QaternaryAbility")))
+APlayerWeapon::APlayerWeapon() : AWeapon()
 {
+}
+
+void APlayerWeapon::Init(UCCombatComponent* CombatComponent)
+{
+	Super::Init(CombatComponent);
+
+	
 }
 
 void APlayerWeapon::OnSelected()
 {
 	Super::OnSelected();
-
-	InputMediator = GetGameInstance()->GetSubsystem<UInputMediator>();
 
 	if (Component)
 	{
@@ -43,5 +42,4 @@ void APlayerWeapon::OnUnselected(TEnumAsByte<UnselectReason> UnSelectReason)
 		Component->SetRemoveAbilityOnEnd(QuaternaryAbilitySpecHandle);
 	}
 }
-
 

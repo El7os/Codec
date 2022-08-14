@@ -31,6 +31,7 @@ public:
 
 	void Action2Pressed() override;
 
+	void ForceAction1ToStop() override;
 
 private:
 
@@ -51,15 +52,15 @@ private:
 	* (It must be a subclass of CEvadeAbility)
 	*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", Category = "Movement|Evade"))
-	TSubclassOf<class UCEvadeAbility> EvadeAbilityClass;
+	TSubclassOf<class UCGameplayAbility> EvadeAbilityClass;
 
 	/*
 	* A gameplay ability class that makes the player slide on the ground.
 	* In order for player to slide on groud, the player must evade while running. 
 	* (It must be a subclass of CSladeAbility)
 	*/
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "trye", Category = "Movement|Slide"))
-	TSubclassOf<class UCSlideAbility> SlideAbilityClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", Category = "Movement|Slide"))
+	TSubclassOf<class UCGameplayAbility> SlideAbilityClass;
 
 	UPROPERTY()
 	FGameplayAbilitySpecHandle EvadeSpecHandle;

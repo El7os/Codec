@@ -3,21 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/NoExportTypes.h"
+#include "StructuresLibrary.generated.h"
 
-/**
- * 
- */
-
-
+USTRUCT()
 struct FDoOnce
 {
-//	GENERATED_USTRUCT_BODY()
-private:
-	bool bHasBeenInited = false;
+	GENERATED_BODY()
 
 public:
 
-	//Returns true if it haven't done anything already.
 	FORCEINLINE bool Do()
 	{
 		if (!bHasBeenInited)
@@ -28,29 +23,39 @@ public:
 		return false;
 	}
 
-	//Resets FDoOnce node
 	FORCEINLINE void Reset() { bHasBeenInited = false; }
-};
 
-struct FGate
-{
-	//GENERATED_USTRUCT_BODY()
 private:
 
-	bool bIsGateOpen = false;
+	UPROPERTY()
+	bool bHasBeenInited = false;
 
+};
+
+USTRUCT()
+struct FGate
+{
+	
+	GENERATED_BODY()
 public:
 
 	FORCEINLINE bool CanPassThrough() { return bIsGateOpen ? true : false; }
 	FORCEINLINE void OpenGate() { bIsGateOpen = true; }
 	FORCEINLINE void CloseGate() { bIsGateOpen = false; }
+
+private:
+
+	UPROPERTY()
+	bool bIsGateOpen = false;
 };
 
 
-
-class CDC_API StructLibrary
+/**
+ * 
+ */
+UCLASS()
+class CDC_API UStructuresLibrary : public UObject
 {
-public:
-	StructLibrary();
-	~StructLibrary();
+	GENERATED_BODY()
+	
 };

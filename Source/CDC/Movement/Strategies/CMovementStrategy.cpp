@@ -5,8 +5,7 @@
 
 #include "CDC/Characters/CPlayerCharacter.h"
 
-UCMovementStrategy::UCMovementStrategy() 
-	: UObject()
+UCMovementStrategy::UCMovementStrategy() : UObject()
 {
 	Owner = Cast<ACPlayerCharacter>(GetOuter());
 	if (Owner)

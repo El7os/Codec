@@ -6,9 +6,6 @@
 #include "Abilities/GameplayAbility.h"
 #include "CGameplayAbility.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class CDC_API UCGameplayAbility : public UGameplayAbility
 {

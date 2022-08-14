@@ -65,6 +65,9 @@ private:
 	UFUNCTION()
 	void Action2Released();
 
+	UFUNCTION()
+	void OnInputMediatorUpdated();
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class UCMovementStrategy> InitialMovementStrategyClass;
 
@@ -84,10 +87,10 @@ private:
 	class UInputMediator* InputMediator = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input",meta = (AllowPrivateAccess = "true"))
-	FGameplayTag ForwardAxisInputBlockerTag;
+	FGameplayTag ForwardInputBlockerTag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input",meta = (AllowPrivateAccess = "true"))
-	FGameplayTag RightAxisInputBlockerTag;
+	FGameplayTag RightInputBlockerTag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input",meta = (AllowPrivateAccess = "true"))
 	FGameplayTag Action1InputBlockerTag;
@@ -100,6 +103,31 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	FGameplayTag MouseYInputBlockerTag;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
+	bool LastForwardInputQueryResult = true;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
+	bool LastRightInputQueryResult = true;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
+	bool LastAction1InputQueryResult = true;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
+	bool LastAction2InputQueryResult = true;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
+	bool LastMouseXInputQueryResult = true;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
+	bool LastMouseYInputQueryResult = true;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
+	bool bIsAction1Active = false;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
+	bool bIsAction2Active = false;
+
 
 };
 

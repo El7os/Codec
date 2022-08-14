@@ -11,7 +11,7 @@
  */
 
 /*
-	Bu ve daha sonraki mediatorlerin kullanacaðý enum
+	Bu ve daha sonraki movement strategylerin kullanacaðý enum
 	sýnýflarý Movement adlý bir namespace içerisinde
 	daha düzenli olarak tutulabilir.
 
@@ -45,9 +45,13 @@ public:
 
 	virtual void Action1Released() {};
 
+	virtual void ForceAction1ToStop() {};
+
 	virtual void Action2Pressed() {};
 
 	virtual void Action2Released() {};
+
+	virtual void ForceAction2ToStop() {};
 
 protected:
 

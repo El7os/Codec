@@ -12,8 +12,8 @@
 
 ACPlayerCharacter::ACPlayerCharacter() 
 	: ACCharacter()
-	, ForwardAxisInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Forward")))
-	, RightAxisInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Right")))
+	, ForwardInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Forward")))
+	, RightInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Right")))
 	, Action1InputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Action1")))
 	, Action2InputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Action2")))
 	, MouseXInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.MouseX")))
@@ -62,6 +62,8 @@ void ACPlayerCharacter::BeginPlay()
 #endif
 
 	InputMediator = GetGameInstance()->GetSubsystem<UInputMediator>();
+	if (InputMediator)
+		InputMediator->MediatorUpdateBroadcast.AddUObject(this, &ACPlayerCharacter::OnInputMediatorUpdated);
 }
 
 UAbilitySystemComponent* ACPlayerCharacter::GetAbilitySystemComponent() const
@@ -100,49 +102,125 @@ void ACPlayerCharacter::ChangeMovementStrategy(UCMovementStrategy* const NewStra
 
 }
 
+void ACPlayerCharacter::OnInputMediatorUpdated()
+{
+	if (InputMediator)
+	{
+		LastForwardInputQueryResult = !InputMediator->GetTags().HasTag(ForwardInputBlockerTag);
+		LastRightInputQueryResult = !InputMediator->GetTags().HasTag(RightInputBlockerTag);
+		LastAction1InputQueryResult = !InputMediator->GetTags().HasTag(Action1InputBlockerTag);
+		LastAction2InputQueryResult = !InputMediator->GetTags().HasTag(Action2InputBlockerTag);
+		LastMouseXInputQueryResult = !InputMediator->GetTags().HasTag(MouseXInputBlockerTag);
+		LastMouseYInputQueryResult = !InputMediator->GetTags().HasTag(MouseYInputBlockerTag);
+
+		if (MovementStrategy)
+		{
+			if (bIsAction1Active && !LastAction1InputQueryResult)
+			{
+				MovementStrategy->ForceAction1ToStop();
+				bIsAction1Active = false;
+			}
+				
+			if (bIsAction2Active && !LastAction2InputQueryResult)
+			{
+				MovementStrategy->ForceAction2ToStop();
+				bIsAction1Active = false;
+			}
+				
+
+		}
+		
+	}
+}
+
 void ACPlayerCharacter::Forward(float AxisValue)
 {
 	//Delegate work to the strategy.
-	if (MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(ForwardAxisInputBlockerTag))
-		MovementStrategy->Forward(AxisValue);
+	if (InputMediator && MovementStrategy)
+	{
+		if (LastForwardInputQueryResult)
+			MovementStrategy->Forward(AxisValue);
+	}
 }
 
 void ACPlayerCharacter::Right(float AxisValue)
 {
-	if (MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(RightAxisInputBlockerTag))
-		MovementStrategy->Right(AxisValue);
+	//Delegate work to the strategy.
+	if (InputMediator && MovementStrategy)
+	{
+		if (LastRightInputQueryResult)
+			MovementStrategy->Right(AxisValue);
+	}
 }
 
 void ACPlayerCharacter::MouseX(float AxisValue)
 {
 	//Delegate work to the strategy.
+	if (InputMediator && MovementStrategy)
+	{
+		if (LastMouseXInputQueryResult)
+			MovementStrategy->MouseX(AxisValue);
+	}
 }
 
 void ACPlayerCharacter::MouseY(float AxisValue)
 {
 	//Delegate work to the strategy.
+	if (InputMediator && MovementStrategy)
+	{
+		if (LastMouseYInputQueryResult)
+			MovementStrategy->MouseY(AxisValue);
+	}
 }
 
 void ACPlayerCharacter::Action1Pressed()
 {
-	if (MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(Action1InputBlockerTag))
-		MovementStrategy->Action1Pressed();
+	//Delegate work to the strategy
+	if (InputMediator && MovementStrategy)
+	{
+		if (LastAction1InputQueryResult)
+		{
+			bIsAction1Active = true;
+			MovementStrategy->Action1Pressed();
+		}
+	}
 }
 
 void ACPlayerCharacter::Action1Released()
 {
-	if (MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(Action1InputBlockerTag))
-		MovementStrategy->Action1Released();	
+	//Delegate work to the strategy
+	if (InputMediator && MovementStrategy)
+	{
+		if (LastAction1InputQueryResult && bIsAction1Active)
+		{
+			MovementStrategy->Action1Released();
+			bIsAction1Active = false;
+		}
+	}
 }
 
 void ACPlayerCharacter::Action2Pressed()
 {
-	if (MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(Action2InputBlockerTag))
-		MovementStrategy->Action2Pressed();
+	//Delegate work to the strategy
+	if (InputMediator && MovementStrategy)
+	{
+		if (LastAction2InputQueryResult)
+		{
+			MovementStrategy->Action2Pressed();
+			bIsAction2Active = true;
+		}
+	}
 }
 
 void ACPlayerCharacter::Action2Released()
 {
-	if(MovementStrategy && InputMediator && !InputMediator->GetTags().HasTag(Action2InputBlockerTag))
-		MovementStrategy->Action2Released();
+	//Delegate work to the strategy
+	if (InputMediator && MovementStrategy)
+	{
+		if (LastAction2InputQueryResult && bIsAction2Active)
+		{
+			bIsAction2Active = false;
+			MovementStrategy->Action2Released();
+		}
+	}
 }
