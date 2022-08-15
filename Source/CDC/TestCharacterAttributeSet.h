@@ -22,4 +22,6 @@ public:
 
 	ATTRIBUTE_ACCESSORS(UTestCharacterAttributeSet, MovementSpeed);
 
+	//A comment line
+
 };
