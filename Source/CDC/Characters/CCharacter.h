@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "CCharacter.generated.h"
 
+/*
+* The base class of all characters in Codec
+*/
 UCLASS()
 class CDC_API ACCharacter : public ACharacter
 {

@@ -10,14 +10,7 @@
 #include "CDC/Components/CCombatComponent.h"
 
 
-ACPlayerCharacter::ACPlayerCharacter() 
-	: ACCharacter()
-	, ForwardInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Forward")))
-	, RightInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Right")))
-	, Action1InputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Action1")))
-	, Action2InputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Action2")))
-	, MouseXInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.MouseX")))
-	, MouseYInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.MouseY")))
+ACPlayerCharacter::ACPlayerCharacter() : ACCharacter()
 {
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Boom"));
 	SpringArm->SetupAttachment(RootComponent);
@@ -61,8 +54,7 @@ void ACPlayerCharacter::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("Ability System Component is null (%s)"), *GetName());
 #endif
 
-	InputMediator = GetGameInstance()->GetSubsystem<UInputMediator>();
-	if (InputMediator)
+	if (UInputMediator* InputMediator = GetGameInstance()->GetSubsystem<UInputMediator>())
 		InputMediator->MediatorUpdateBroadcast.AddUObject(this, &ACPlayerCharacter::OnInputMediatorUpdated);
 }
 
@@ -102,16 +94,16 @@ void ACPlayerCharacter::ChangeMovementStrategy(UCMovementStrategy* const NewStra
 
 }
 
-void ACPlayerCharacter::OnInputMediatorUpdated()
+void ACPlayerCharacter::OnInputMediatorUpdated(const class UInputMediator* const InputMediator)
 {
 	if (InputMediator)
 	{
-		LastForwardInputQueryResult = !InputMediator->GetTags().HasTag(ForwardInputBlockerTag);
-		LastRightInputQueryResult = !InputMediator->GetTags().HasTag(RightInputBlockerTag);
-		LastAction1InputQueryResult = !InputMediator->GetTags().HasTag(Action1InputBlockerTag);
-		LastAction2InputQueryResult = !InputMediator->GetTags().HasTag(Action2InputBlockerTag);
-		LastMouseXInputQueryResult = !InputMediator->GetTags().HasTag(MouseXInputBlockerTag);
-		LastMouseYInputQueryResult = !InputMediator->GetTags().HasTag(MouseYInputBlockerTag);
+		LastForwardInputQueryResult = !InputMediator->bIsForwardInputBlocked();
+		LastRightInputQueryResult = !InputMediator->bIsRightInputBlocked();
+		LastAction1InputQueryResult = !InputMediator->bIsAction1InputBlocked();
+		LastAction2InputQueryResult = !InputMediator->bIsAction2InputBlocked();
+		LastMouseXInputQueryResult = !InputMediator->bIsMouseXInputBlocked();
+		LastMouseYInputQueryResult = !InputMediator->bIsMouseYInputBlocked();
 
 		if (MovementStrategy)
 		{
@@ -126,17 +118,14 @@ void ACPlayerCharacter::OnInputMediatorUpdated()
 				MovementStrategy->ForceAction2ToStop();
 				bIsAction1Active = false;
 			}
-				
-
 		}
-		
 	}
 }
 
 void ACPlayerCharacter::Forward(float AxisValue)
 {
 	//Delegate work to the strategy.
-	if (InputMediator && MovementStrategy)
+	if (MovementStrategy)
 	{
 		if (LastForwardInputQueryResult)
 			MovementStrategy->Forward(AxisValue);
@@ -146,7 +135,7 @@ void ACPlayerCharacter::Forward(float AxisValue)
 void ACPlayerCharacter::Right(float AxisValue)
 {
 	//Delegate work to the strategy.
-	if (InputMediator && MovementStrategy)
+	if (MovementStrategy)
 	{
 		if (LastRightInputQueryResult)
 			MovementStrategy->Right(AxisValue);
@@ -156,7 +145,7 @@ void ACPlayerCharacter::Right(float AxisValue)
 void ACPlayerCharacter::MouseX(float AxisValue)
 {
 	//Delegate work to the strategy.
-	if (InputMediator && MovementStrategy)
+	if (MovementStrategy)
 	{
 		if (LastMouseXInputQueryResult)
 			MovementStrategy->MouseX(AxisValue);
@@ -166,7 +155,7 @@ void ACPlayerCharacter::MouseX(float AxisValue)
 void ACPlayerCharacter::MouseY(float AxisValue)
 {
 	//Delegate work to the strategy.
-	if (InputMediator && MovementStrategy)
+	if (MovementStrategy)
 	{
 		if (LastMouseYInputQueryResult)
 			MovementStrategy->MouseY(AxisValue);
@@ -176,7 +165,7 @@ void ACPlayerCharacter::MouseY(float AxisValue)
 void ACPlayerCharacter::Action1Pressed()
 {
 	//Delegate work to the strategy
-	if (InputMediator && MovementStrategy)
+	if (MovementStrategy)
 	{
 		if (LastAction1InputQueryResult)
 		{
@@ -189,7 +178,7 @@ void ACPlayerCharacter::Action1Pressed()
 void ACPlayerCharacter::Action1Released()
 {
 	//Delegate work to the strategy
-	if (InputMediator && MovementStrategy)
+	if (MovementStrategy)
 	{
 		if (LastAction1InputQueryResult && bIsAction1Active)
 		{
@@ -202,7 +191,7 @@ void ACPlayerCharacter::Action1Released()
 void ACPlayerCharacter::Action2Pressed()
 {
 	//Delegate work to the strategy
-	if (InputMediator && MovementStrategy)
+	if (MovementStrategy)
 	{
 		if (LastAction2InputQueryResult)
 		{
@@ -215,7 +204,7 @@ void ACPlayerCharacter::Action2Pressed()
 void ACPlayerCharacter::Action2Released()
 {
 	//Delegate work to the strategy
-	if (InputMediator && MovementStrategy)
+	if (MovementStrategy)
 	{
 		if (LastAction2InputQueryResult && bIsAction2Active)
 		{

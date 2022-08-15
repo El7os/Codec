@@ -7,12 +7,7 @@
 #include "CDC/Weapons/PlayerWeapons/PlayerWeapon.h"
 
 
-ACPlayerController::ACPlayerController()
-	: APlayerController()
-	, PrimaryAbilityInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Weapon.PrimaryAbility")))
-	, SecondaryAbilityInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Weapon.SecondaryAbility")))
-	, TertiaryAbilityInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Weapon.TertiaryAbility")))
-	, QuaternaryAbilityInputBlockerTag(FGameplayTag::RequestGameplayTag(TEXT("Control.Block.Input.Weapon.QaternaryAbility")))
+ACPlayerController::ACPlayerController() : APlayerController()
 {
 }
 
@@ -56,31 +51,26 @@ void ACPlayerController::BeginPlay()
 	}
 }
 
-void ACPlayerController::OnInputMediatorUpdated()
+void ACPlayerController::OnInputMediatorUpdated(const UInputMediator* const InputMediator)
 {
 	if (UInputMediator* InputMediator = GetGameInstance()->GetSubsystem<UInputMediator>())
 	{
-		bool CacheForPrimary = InputMediator->GetTags().HasTag(PrimaryAbilityInputBlockerTag);
-		bool CacheForSecondary = InputMediator->GetTags().HasTag(SecondaryAbilityInputBlockerTag);
-		bool CacheForTertiary = InputMediator->GetTags().HasTag(TertiaryAbilityInputBlockerTag);
-		bool CacheForQuaternary = InputMediator->GetTags().HasTag(QuaternaryAbilityInputBlockerTag);
+		bool CacheForPrimary = InputMediator->bIsWeaponPrimaryInputBlocked();
+		bool CacheForSecondary = InputMediator->bIsWeaponSecondaryInputBlocked();
+		bool CacheForTertiary = InputMediator->bIsWeaponTertiaryInputBlocked();
+		bool CacheForQuaternary = InputMediator->bIsWeaponQuaternaryInputBlocked();
 
-		if (CacheForPrimary && !bPrimaryAbilityBlocked)
+		if (CacheForPrimary && !PrimaryInputExtractor.GetBlockExtraction())
 			PrimaryAbilityBlockedDelegate.ExecuteIfBound();
 
-		if (CacheForSecondary && !bSecondaryAbilityBlocked)
+		if (CacheForSecondary && !SecondaryInputExtractor.GetBlockExtraction())
 			SecondaryAbilityBlockedDelegate.ExecuteIfBound();
 
-		if (CacheForTertiary && !bTertiaryAbilityBlocked)
+		if (CacheForTertiary && !TertiaryInputExtractor.GetBlockExtraction())
 			TertiaryAbilityBlockedDelegate.ExecuteIfBound();
 
-		if (CacheForQuaternary && !bQuaternaryAbilityBlocked)
+		if (CacheForQuaternary && !QuaternaryInputExtractor.GetBlockExtraction())
 			QuaternaryAbilityBlockedDelegate.ExecuteIfBound();
-
-		bPrimaryAbilityBlocked = CacheForPrimary;
-		bSecondaryAbilityBlocked = CacheForSecondary;
-		bTertiaryAbilityBlocked = CacheForTertiary;
-		bQuaternaryAbilityBlocked = CacheForQuaternary;
 
 		PrimaryInputExtractor.SetBlockExtraction(CacheForPrimary);
 		SecondaryInputExtractor.SetBlockExtraction(CacheForSecondary);

@@ -50,6 +50,8 @@ public:
 
 	FORCEINLINE void SetBlockExtraction(bool bOutBlockExtraction) { bBlockExtraction = bBlockExtraction; }
 
+	FORCEINLINE bool GetBlockExtraction() { return bBlockExtraction; }
+
 	void AxisEvent(float AxisValue) 
 	{
 		if (!AxisValue || bBlockExtraction) return;
@@ -151,7 +153,6 @@ private:
 
 };
 
-
 UCLASS()
 class CDC_API ACPlayerController : public APlayerController
 {
@@ -179,7 +180,7 @@ protected:
 private:
 
 	UFUNCTION()
-	void OnInputMediatorUpdated();
+	void OnInputMediatorUpdated(const class UInputMediator* const InputMediator);
 
 	UFUNCTION()
 	void PrimaryAxisFunc(float AxisValue) { PrimaryInputExtractor.AxisEvent(AxisValue); };
@@ -229,18 +230,6 @@ private:
 	UPROPERTY()
 	FWeaponInputExtractor QuaternaryInputExtractor;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
-	FGameplayTag PrimaryAbilityInputBlockerTag;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
-	FGameplayTag SecondaryAbilityInputBlockerTag;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
-	FGameplayTag TertiaryAbilityInputBlockerTag;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
-	FGameplayTag QuaternaryAbilityInputBlockerTag;
-
 	NoParamOnMediatorUpdateDelegate PrimaryAbilityBlockedDelegate;
 
 	NoParamOnMediatorUpdateDelegate SecondaryAbilityBlockedDelegate;
@@ -248,12 +237,4 @@ private:
 	NoParamOnMediatorUpdateDelegate TertiaryAbilityBlockedDelegate;
 
 	NoParamOnMediatorUpdateDelegate QuaternaryAbilityBlockedDelegate;
-
-	bool bPrimaryAbilityBlocked = false;
-
-	bool bSecondaryAbilityBlocked = false;
-
-	bool bTertiaryAbilityBlocked = false;
-
-	bool bQuaternaryAbilityBlocked = false;
 };

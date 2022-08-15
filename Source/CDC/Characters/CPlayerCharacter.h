@@ -8,7 +8,9 @@
 #include "GameplayTagContainer.h"
 #include "CPlayerCharacter.generated.h"
 /**
- * 
+ * The base class of all characters that can be used by the player.
+ * It responsible for having the ability system component and delegating 
+ * the input to strategies.The Input Mediator blocks the input flow at this level.
  */
 UCLASS()
 class CDC_API ACPlayerCharacter : public ACCharacter, public IAbilitySystemInterface
@@ -30,9 +32,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE USpringArmComponent* const GetSpringArm() { return SpringArm;}
-
-	UFUNCTION(BlueprintCallable)
-	FORCEINLINE UInputMediator* const GetInputMediator() { return InputMediator; }
 
 
 protected:
@@ -66,7 +65,7 @@ private:
 	void Action2Released();
 
 	UFUNCTION()
-	void OnInputMediatorUpdated();
+	void OnInputMediatorUpdated(const class UInputMediator* const InputMediator);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class UCMovementStrategy> InitialMovementStrategyClass;
@@ -82,27 +81,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	class UCCombatComponent* CombatComponent = nullptr;
-
-	UPROPERTY()
-	class UInputMediator* InputMediator = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input",meta = (AllowPrivateAccess = "true"))
-	FGameplayTag ForwardInputBlockerTag;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input",meta = (AllowPrivateAccess = "true"))
-	FGameplayTag RightInputBlockerTag;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input",meta = (AllowPrivateAccess = "true"))
-	FGameplayTag Action1InputBlockerTag;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input",meta = (AllowPrivateAccess = "true"))
-	FGameplayTag Action2InputBlockerTag;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	FGameplayTag MouseXInputBlockerTag;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	FGameplayTag MouseYInputBlockerTag;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
 	bool LastForwardInputQueryResult = true;

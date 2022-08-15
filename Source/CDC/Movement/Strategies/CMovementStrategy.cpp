@@ -2,7 +2,7 @@
 
 
 #include "CDC/Movement/Strategies/CMovementStrategy.h"
-
+#include "CDC/Movement/Mediators/InputMediator.h"
 #include "CDC/Characters/CPlayerCharacter.h"
 
 UCMovementStrategy::UCMovementStrategy() : UObject()
@@ -10,6 +10,6 @@ UCMovementStrategy::UCMovementStrategy() : UObject()
 	Owner = Cast<ACPlayerCharacter>(GetOuter());
 	if (Owner)
 	{
-		InputMediator = Owner->GetInputMediator();
+		InputMediator = Owner->GetGameInstance<UInputMediator>();
 	}
 }
