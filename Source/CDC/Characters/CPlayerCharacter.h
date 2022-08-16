@@ -79,32 +79,35 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* SpringArm = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	class UCCombatComponent* CombatComponent = nullptr;
 
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
-	bool LastForwardInputQueryResult = true;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UCombatAttributeSet* CombatAttributeSet = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
-	bool LastRightInputQueryResult = true;
+	bool bForwardInputBlocked = true;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
-	bool LastAction1InputQueryResult = true;
+	bool bRightInputBlocked = true;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
-	bool LastAction2InputQueryResult = true;
+	bool bAction1InputBlocked = true;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
-	bool LastMouseXInputQueryResult = true;
+	bool bAction2InputBlocked = true;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
-	bool LastMouseYInputQueryResult = true;
+	bool bMouseXInputBlocked = true;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
-	bool bIsAction1Active = false;
+	bool bMouseYInputBlocked = true;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
-	bool bIsAction2Active = false;
+	bool bAction1IsPressed = false;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Input")
+	bool bAction2IsPressed = false;
 
 
 };

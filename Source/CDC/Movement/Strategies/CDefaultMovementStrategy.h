@@ -41,26 +41,30 @@ private:
 	UPROPERTY()
 	class UAbilitySystemComponent* OwnerCombatComponent = nullptr;
 
-	/*
-		It represents the calculation type of the additional speed when the player character runs
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true", Category = "Movement|Run", ExposeOnSpawn = "true"))
-	TEnumAsByte<EAccelerationType> AccelerationType = EAccelerationType::Fixed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Run", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> RunningGameplayEffectClass;
 	
 	/*
 	* A gameplay ability class makes the player evade. 
-	* (It must be a subclass of CEvadeAbility)
 	*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", Category = "Movement|Evade"))
 	TSubclassOf<class UCGameplayAbility> EvadeAbilityClass;
 
 	/*
 	* A gameplay ability class that makes the player slide on the ground.
-	* In order for player to slide on groud, the player must evade while running. 
-	* (It must be a subclass of CSladeAbility)
+	* In order for player to slide on groud, the player must evade while running.
 	*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", Category = "Movement|Slide"))
 	TSubclassOf<class UCGameplayAbility> SlideAbilityClass;
+
+	/*
+		It represents the calculation type of the additional speed when the player character runs
+	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true", Category = "Movement|Run", ExposeOnSpawn = "true"))
+	TEnumAsByte<EAccelerationType> AccelerationType = EAccelerationType::Fixed;
+
+	UPROPERTY()
+	FActiveGameplayEffectHandle ActiveRunningEffectHandle;
 
 	UPROPERTY()
 	FGameplayAbilitySpecHandle EvadeSpecHandle;

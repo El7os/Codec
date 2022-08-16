@@ -7,6 +7,7 @@
 #include "Camera/CameraComponent.h"
 #include "CDC/Movement/Strategies/CDefaultMovementStrategy.h"
 #include "CDC/Movement/Mediators/InputMediator.h"
+#include "CDC/AttributeSets/CombatAttributeSet.h"
 #include "CDC/Components/CCombatComponent.h"
 
 
@@ -22,6 +23,9 @@ ACPlayerCharacter::ACPlayerCharacter() : ACCharacter()
 	Camera->FieldOfView = 110.0f;
 
 	CombatComponent = CreateDefaultSubobject<UCCombatComponent>(TEXT("Combat Component"));
+
+
+	CombatAttributeSet = CreateDefaultSubobject<UCombatAttributeSet>(TEXT("Combat Attribute Set"));
 }
 
 void ACPlayerCharacter::PostInitializeComponents()
@@ -37,10 +41,7 @@ void ACPlayerCharacter::PostInitializeComponents()
 #ifdef WITH_EDITOR
 		UE_LOG(LogTemp,Warning,TEXT("Movement strategy class isn't valid. It assumed default"))
 #endif // WITH_EDITOR
-	}
-
-	
-		
+	}	
 }
 
 void ACPlayerCharacter::BeginPlay()
@@ -55,7 +56,19 @@ void ACPlayerCharacter::BeginPlay()
 #endif
 
 	if (UInputMediator* InputMediator = GetGameInstance()->GetSubsystem<UInputMediator>())
+	{
 		InputMediator->MediatorUpdateBroadcast.AddUObject(this, &ACPlayerCharacter::OnInputMediatorUpdated);
+		bForwardInputBlocked = InputMediator->bIsForwardInputBlocked();
+		bRightInputBlocked = InputMediator->bIsRightInputBlocked();
+		bAction1InputBlocked = InputMediator->bIsAction1InputBlocked();
+		bAction2InputBlocked = InputMediator->bIsAction2InputBlocked();
+		bMouseXInputBlocked = InputMediator->bIsMouseXInputBlocked();
+		bMouseYInputBlocked = InputMediator->bIsMouseYInputBlocked();
+	}
+#ifdef WITH_EDITOR
+	else UE_LOG(LogTemp, Warning, TEXT("Input mediator cannot be reached."));
+#endif
+		
 }
 
 UAbilitySystemComponent* ACPlayerCharacter::GetAbilitySystemComponent() const
@@ -98,25 +111,25 @@ void ACPlayerCharacter::OnInputMediatorUpdated(const class UInputMediator* const
 {
 	if (InputMediator)
 	{
-		LastForwardInputQueryResult = !InputMediator->bIsForwardInputBlocked();
-		LastRightInputQueryResult = !InputMediator->bIsRightInputBlocked();
-		LastAction1InputQueryResult = !InputMediator->bIsAction1InputBlocked();
-		LastAction2InputQueryResult = !InputMediator->bIsAction2InputBlocked();
-		LastMouseXInputQueryResult = !InputMediator->bIsMouseXInputBlocked();
-		LastMouseYInputQueryResult = !InputMediator->bIsMouseYInputBlocked();
+		bForwardInputBlocked = InputMediator->bIsForwardInputBlocked();
+		bRightInputBlocked = InputMediator->bIsRightInputBlocked();
+		bAction1InputBlocked = InputMediator->bIsAction1InputBlocked();
+		bAction2InputBlocked = InputMediator->bIsAction2InputBlocked();
+		bMouseXInputBlocked = InputMediator->bIsMouseXInputBlocked();
+		bMouseYInputBlocked = InputMediator->bIsMouseYInputBlocked();
 
 		if (MovementStrategy)
 		{
-			if (bIsAction1Active && !LastAction1InputQueryResult)
+			if (bAction1InputBlocked && bAction1IsPressed)
 			{
 				MovementStrategy->ForceAction1ToStop();
-				bIsAction1Active = false;
+				bAction1IsPressed = false;
 			}
 				
-			if (bIsAction2Active && !LastAction2InputQueryResult)
+			if (bAction2InputBlocked && bAction2IsPressed)
 			{
 				MovementStrategy->ForceAction2ToStop();
-				bIsAction1Active = false;
+				bAction2IsPressed = false;
 			}
 		}
 	}
@@ -127,7 +140,7 @@ void ACPlayerCharacter::Forward(float AxisValue)
 	//Delegate work to the strategy.
 	if (MovementStrategy)
 	{
-		if (LastForwardInputQueryResult)
+		if (!bForwardInputBlocked)
 			MovementStrategy->Forward(AxisValue);
 	}
 }
@@ -137,7 +150,7 @@ void ACPlayerCharacter::Right(float AxisValue)
 	//Delegate work to the strategy.
 	if (MovementStrategy)
 	{
-		if (LastRightInputQueryResult)
+		if (!bRightInputBlocked)
 			MovementStrategy->Right(AxisValue);
 	}
 }
@@ -147,7 +160,7 @@ void ACPlayerCharacter::MouseX(float AxisValue)
 	//Delegate work to the strategy.
 	if (MovementStrategy)
 	{
-		if (LastMouseXInputQueryResult)
+		if (!bMouseXInputBlocked)
 			MovementStrategy->MouseX(AxisValue);
 	}
 }
@@ -157,7 +170,7 @@ void ACPlayerCharacter::MouseY(float AxisValue)
 	//Delegate work to the strategy.
 	if (MovementStrategy)
 	{
-		if (LastMouseYInputQueryResult)
+		if (!bMouseYInputBlocked)
 			MovementStrategy->MouseY(AxisValue);
 	}
 }
@@ -167,9 +180,9 @@ void ACPlayerCharacter::Action1Pressed()
 	//Delegate work to the strategy
 	if (MovementStrategy)
 	{
-		if (LastAction1InputQueryResult)
+		if (!bAction1InputBlocked)
 		{
-			bIsAction1Active = true;
+			bAction1IsPressed = true;
 			MovementStrategy->Action1Pressed();
 		}
 	}
@@ -180,10 +193,10 @@ void ACPlayerCharacter::Action1Released()
 	//Delegate work to the strategy
 	if (MovementStrategy)
 	{
-		if (LastAction1InputQueryResult && bIsAction1Active)
+		if (!bAction1InputBlocked && bAction1IsPressed)
 		{
 			MovementStrategy->Action1Released();
-			bIsAction1Active = false;
+			bAction1IsPressed = false;
 		}
 	}
 }
@@ -193,10 +206,10 @@ void ACPlayerCharacter::Action2Pressed()
 	//Delegate work to the strategy
 	if (MovementStrategy)
 	{
-		if (LastAction2InputQueryResult)
+		if (!bAction2InputBlocked)
 		{
 			MovementStrategy->Action2Pressed();
-			bIsAction2Active = true;
+			bAction2IsPressed = true;
 		}
 	}
 }
@@ -206,9 +219,9 @@ void ACPlayerCharacter::Action2Released()
 	//Delegate work to the strategy
 	if (MovementStrategy)
 	{
-		if (LastAction2InputQueryResult && bIsAction2Active)
+		if (!bAction2InputBlocked && bAction2IsPressed)
 		{
-			bIsAction2Active = false;
+			bAction2IsPressed = false;
 			MovementStrategy->Action2Released();
 		}
 	}

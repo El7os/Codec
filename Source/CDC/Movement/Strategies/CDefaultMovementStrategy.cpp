@@ -8,7 +8,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "CDC/GameplayAbilities/CGameplayAbility.h"
 #include "AbilitySystemComponent.h"
-
+#include "CDC/AttributeSets/CombatAttributeSet.h"
 
 UCDefaultMovementStrategy::UCDefaultMovementStrategy() : UCMovementStrategy()
 {
@@ -20,7 +20,6 @@ void UCDefaultMovementStrategy::PostInitProperties()
 
 	if (Owner)
 	{
-		SetCharacterMovementProperties();
 		OwnerCombatComponent = Owner->GetAbilitySystemComponent();
 		if (OwnerCombatComponent)
 		{
@@ -28,27 +27,38 @@ void UCDefaultMovementStrategy::PostInitProperties()
 
 			SlideSpecHandle = OwnerCombatComponent->GiveAbility(FGameplayAbilitySpec(SlideAbilityClass, 1, -1, this));
 		}
-#if WITH_EDITOR
+#ifdef WITH_EDITOR
 		else
 			UE_LOG(LogTemp,Warning,TEXT("Owner's ability system component could not be reached Source:(%s), Owner(%s)"),*GetName(), *Owner->GetName())
-#endif
-			
+#endif	
+		SetCharacterMovementProperties();
 	}
 }
 
 void UCDefaultMovementStrategy::SetCharacterMovementProperties()
 {
-	UCharacterMovementComponent* MovementComp = Owner->GetCharacterMovement();
-	if (MovementComp)
+	if (UCharacterMovementComponent* MovementComp = Owner->GetCharacterMovement())
 	{
 		MovementComp->bOrientRotationToMovement = true;
 		MovementComp->MaxAcceleration = 1000.0f;
 
-		if (bAutoAdjustSpeed)
+		if (bAutoAdjustSpeed && OwnerCombatComponent)
 		{
-			MovementComp->MaxWalkSpeed = CharacterSpeed;
-		}
+			if (OwnerCombatComponent)
+			{
+				FGameplayEffectContextHandle EffectContextHandle = OwnerCombatComponent->MakeEffectContext();
+				EffectContextHandle.AddInstigator(Owner, Owner);
+				EffectContextHandle.AddSourceObject(this);
 
+				FGameplayEffectSpecHandle EffectSpecHandle = OwnerCombatComponent->MakeOutgoingSpec(RunningGameplayEffectClass, 1, EffectContextHandle);
+
+				if (EffectContextHandle.IsValid())
+				{
+					EffectSpecHandle.Data.Get()->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag(TEXT("GameplayEffect.DataTag.Running.Speed")), CharacterSpeed);
+					ActiveRunningEffectHandle = OwnerCombatComponent->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
+				}
+			}
+		}
 	}
 
 	Owner->GetSpringArm()->bUsePawnControlRotation = false;
@@ -80,54 +90,53 @@ void UCDefaultMovementStrategy::Right(float AxisValue)
 
 void UCDefaultMovementStrategy::Action1Pressed()
 {
-	/*if (OwnerCombatComponent)
+	UE_LOG(LogTemp, Warning, TEXT("Movement Speed : %f"), Owner->GetCharacterMovement()->MaxWalkSpeed);
+	switch (AccelerationType)
 	{
-		FGameplayEffectContextHandle EffectContext = OwnerCombatComponent->MakeEffectContext();
-		EffectContext.AddSourceObject(this);
-		FGameplayEffectSpecHandle EffectSpec = OwnerCombatComponent->MakeOutgoingSpec(RunningEffect, 1, EffectContext);
-		ActiveHandle = OwnerCombatComponent->ApplyGameplayEffectSpecToSelf(*EffectSpec.Data.Get());
+	case EAccelerationType::ByPrecent:
+		SpeedContribution = Owner->GetCharacterMovement()->MaxWalkSpeed * (AdditionalPercent / 100);
+		break;
+	case EAccelerationType::Fixed:
+		SpeedContribution = AdditionalSpeed;
+		break;
 	}
-	return;*/
-	if (Owner && Owner->GetCharacterMovement())
+
+	if (OwnerCombatComponent)
 	{
-		switch (AccelerationType)
+		FGameplayEffectContextHandle EffectContextHandle = OwnerCombatComponent->MakeEffectContext();
+		EffectContextHandle.AddInstigator(Owner,Owner);
+		EffectContextHandle.AddSourceObject(this);
+
+		FGameplayEffectSpecHandle EffectSpecHandle = OwnerCombatComponent->MakeOutgoingSpec(RunningGameplayEffectClass, 1, EffectContextHandle);
+
+		if (EffectContextHandle.IsValid())
 		{
-		case EAccelerationType::ByPrecent:
-
-			 SpeedContribution = Owner->GetCharacterMovement()->MaxWalkSpeed * (AdditionalPercent / 100);
-			 Owner->GetCharacterMovement()->MaxWalkSpeed += SpeedContribution;
-
-			break;
-		case EAccelerationType::Fixed:
-
-			Owner->GetCharacterMovement()->MaxWalkSpeed += AdditionalSpeed;
-			
-			break;
+			EffectSpecHandle.Data.Get()->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag(TEXT("GameplayEffect.DataTag.Running.Speed")), SpeedContribution + Owner->GetCharacterMovement()->MaxWalkSpeed);
+			ActiveRunningEffectHandle = OwnerCombatComponent->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
 		}
 		bIsRunning = true;
-	}
+	}	
+	UE_LOG(LogTemp, Warning, TEXT("Movement Speed : %f"), Owner->GetCharacterMovement()->MaxWalkSpeed);
 }
 
 void UCDefaultMovementStrategy::Action1Released()
 {
-	if (Owner && Owner->GetCharacterMovement())
+	
+	if (OwnerCombatComponent)
 	{
-		switch (AccelerationType)
+		OwnerCombatComponent->RemoveActiveGameplayEffect(ActiveRunningEffectHandle);
+		ActiveRunningEffectHandle.Invalidate();
+		
+		FGameplayEffectContextHandle EffectContextHandle = OwnerCombatComponent->MakeEffectContext();
+		EffectContextHandle.AddInstigator(Owner, Owner);
+		EffectContextHandle.AddSourceObject(this);
+
+		FGameplayEffectSpecHandle EffectSpecHandle = OwnerCombatComponent->MakeOutgoingSpec(RunningGameplayEffectClass, 1, EffectContextHandle);
+
+		if (EffectContextHandle.IsValid())
 		{
-		case EAccelerationType::ByPrecent:
-
-			Owner->GetCharacterMovement()->MaxWalkSpeed -= SpeedContribution;
-			SpeedContribution = 0;
-
-			break;
-		case EAccelerationType::Fixed:
-
-			Owner->GetCharacterMovement()->MaxWalkSpeed -= AdditionalSpeed;
-
-			break;
-
-		default:
-			break;
+			EffectSpecHandle.Data.Get()->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag(TEXT("GameplayEffect.DataTag.Running.Speed")), Owner->GetCharacterMovement()->MaxWalkSpeed - SpeedContribution);
+			ActiveRunningEffectHandle = OwnerCombatComponent->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
 		}
 		bIsRunning = false;
 	}

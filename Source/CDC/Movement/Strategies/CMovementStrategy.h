@@ -58,6 +58,4 @@ protected:
 	UPROPERTY()
 	class ACPlayerCharacter* Owner = nullptr;
 
-	UPROPERTY()
-	class UInputMediator* InputMediator = nullptr;
 };

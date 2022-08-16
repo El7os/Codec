@@ -55,7 +55,7 @@ public:
 	void AxisEvent(float AxisValue) 
 	{
 		if (!AxisValue || bBlockExtraction) return;
-		if (!bIsInputTerminated)
+		if (!bInputIsTerminated)
 		{
 			if (Gate_1.CanPassThrough())
 			{
@@ -99,7 +99,7 @@ public:
 	void ReleasedEvent()
 	{
 		if (bBlockExtraction) return;
-		if (!bIsInputTerminated)
+		if (!bInputIsTerminated)
 		{
 			Gate_1.CloseGate();
 			if (HoverTime > 0)
@@ -115,7 +115,7 @@ public:
 		}
 		else
 		{
-			bIsInputTerminated = false;
+			bInputIsTerminated = false;
 			DoOnce_2.Reset();
 		}
 
@@ -146,7 +146,7 @@ private:
 	float HoverStartThreshold = 0.3f;
 
 	UPROPERTY()
-	bool bIsInputTerminated = false;
+	bool bInputIsTerminated = false;
 	
 	UPROPERTY()
 	bool bBlockExtraction = false;

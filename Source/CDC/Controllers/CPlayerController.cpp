@@ -117,7 +117,7 @@ void ACPlayerController::BindWeapon(APlayerWeapon* const Weapon)
 		QuaternaryInputExtractor.ReleasedDelegate.BindUObject(Weapon, &APlayerWeapon::QuaternaryReleased);
 		QuaternaryAbilityBlockedDelegate.BindUObject(Weapon, &APlayerWeapon::OnQuaternaryInputBlocked);
 	}
-#if WITH_EDITOR
+#ifdef WITH_EDITOR
 	else
 		UE_LOG(LogTemp, Warning, TEXT("Weapon cannot be bounded, it is null %s"), __FUNCTION__);
 #endif
@@ -161,7 +161,7 @@ void ACPlayerController::UnbindWeapon(APlayerWeapon* const Weapon)
 		QuaternaryInputExtractor.ReleasedDelegate.Unbind();
 		QuaternaryAbilityBlockedDelegate.Unbind();
 	}
-#if WITH_EDITOR
+#ifdef WITH_EDITOR
 	else
 	UE_LOG(LogTemp, Warning, TEXT("Weapon cannot be unbounded, it is null %s"), __FUNCTION__);
 #endif
