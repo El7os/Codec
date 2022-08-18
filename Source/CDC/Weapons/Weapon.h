@@ -19,7 +19,7 @@ UCLASS(Abstract)
 class CDC_API AWeapon : public AActor
 {
 	GENERATED_BODY()
-
+	friend class UCCombatComponent;
 
 public:	
 	AWeapon();

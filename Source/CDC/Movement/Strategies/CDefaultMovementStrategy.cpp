@@ -29,7 +29,7 @@ void UCDefaultMovementStrategy::PostInitProperties()
 		}
 #ifdef WITH_EDITOR
 		else
-			UE_LOG(LogTemp,Warning,TEXT("Owner's ability system component could not be reached Source:(%s), Owner(%s)"),*GetName(), *Owner->GetName())
+			UE_LOG(LogTemp, Warning, TEXT("Owner's ability system component could not be reached Source:(%s), Owner(%s)"), *GetName(), *Owner->GetName())
 #endif	
 		SetCharacterMovementProperties();
 	}
@@ -85,12 +85,11 @@ void UCDefaultMovementStrategy::Right(float AxisValue)
 	{
 		Owner->AddMovementInput(FVector(0.f, 1.f, 0.f), AxisValue);
 	}
-	
+
 }
 
 void UCDefaultMovementStrategy::Action1Pressed()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Movement Speed : %f"), Owner->GetCharacterMovement()->MaxWalkSpeed);
 	switch (AccelerationType)
 	{
 	case EAccelerationType::ByPrecent:
@@ -104,7 +103,7 @@ void UCDefaultMovementStrategy::Action1Pressed()
 	if (OwnerCombatComponent)
 	{
 		FGameplayEffectContextHandle EffectContextHandle = OwnerCombatComponent->MakeEffectContext();
-		EffectContextHandle.AddInstigator(Owner,Owner);
+		EffectContextHandle.AddInstigator(Owner, Owner);
 		EffectContextHandle.AddSourceObject(this);
 
 		FGameplayEffectSpecHandle EffectSpecHandle = OwnerCombatComponent->MakeOutgoingSpec(RunningGameplayEffectClass, 1, EffectContextHandle);
@@ -115,18 +114,17 @@ void UCDefaultMovementStrategy::Action1Pressed()
 			ActiveRunningEffectHandle = OwnerCombatComponent->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
 		}
 		bIsRunning = true;
-	}	
-	UE_LOG(LogTemp, Warning, TEXT("Movement Speed : %f"), Owner->GetCharacterMovement()->MaxWalkSpeed);
+	}
 }
 
 void UCDefaultMovementStrategy::Action1Released()
 {
-	
+
 	if (OwnerCombatComponent)
 	{
 		OwnerCombatComponent->RemoveActiveGameplayEffect(ActiveRunningEffectHandle);
 		ActiveRunningEffectHandle.Invalidate();
-		
+
 		FGameplayEffectContextHandle EffectContextHandle = OwnerCombatComponent->MakeEffectContext();
 		EffectContextHandle.AddInstigator(Owner, Owner);
 		EffectContextHandle.AddSourceObject(this);

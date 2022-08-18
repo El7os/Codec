@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -7,15 +7,14 @@
 #include "CMovementStrategy.generated.h"
 
 /**
- * 
+ *
  */
 
-/*
-	Bu ve daha sonraki movement strategylerin kullanacaðý enum
-	sýnýflarý Movement adlý bir namespace içerisinde
-	daha düzenli olarak tutulabilir.
-
-*/
+ /*
+	 Bu ve daha sonraki movement strategylerin kullanacaÃ°Ã½ enum
+	 sÃ½nÃ½flarÃ½ Movement adlÃ½ bir namespace iÃ§erisinde
+	 daha dÃ¼zenli olarak tutulabilir.
+ */
 UENUM()
 enum EAccelerationType
 {
@@ -56,6 +55,6 @@ public:
 protected:
 
 	UPROPERTY()
-	class ACPlayerCharacter* Owner = nullptr;
+		class ACPlayerCharacter* Owner = nullptr;
 
 };

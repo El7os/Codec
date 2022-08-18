@@ -48,6 +48,7 @@ void ACPlayerController::BeginPlay()
 	if (UInputMediator* InputMediator = GetGameInstance()->GetSubsystem<UInputMediator>())
 	{
 		InputMediator->MediatorUpdateBroadcast.AddUObject(this, &ACPlayerController::OnInputMediatorUpdated);
+		OnInputMediatorUpdated(InputMediator);
 	}
 }
 
