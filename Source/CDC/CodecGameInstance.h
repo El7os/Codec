@@ -15,25 +15,28 @@ class CDC_API UCodecGameInstance : public UGameInstance
 	GENERATED_BODY()
 
 public:
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Weapons|PlayerWeapons")
-	TArray<TSubclassOf<class AWeapon>> PlayerWeaponClasses;
-
 	/*
 	* Spawns corresponding weapon to id  at specified transform in specified world.
 	* Returns the weapon type as it is requested.
 	* If only a AWeapon is needed use CreateWeapon insted of.
 	*/
 	template<typename T>
-	T* SpawnWeapon(UWorld* const OutWorldContext, int WeaponID, const FTransform& CustomTransformToSpawn = FTransform(FVector(0.0f, 0.0f, -1000.0f)))
+	T* SpawnWeapon(UWorld* const OutWorldContext, int32 WeaponID, const FTransform& CustomTransformToSpawn = FTransform(FVector(0.0f, 0.0f, -1000.0f)))
 	{
-		if (OutWorldContext && PlayerWeaponClasses.Num() > WeaponID && WeaponID >= 0)
+		if (GetWorld())
 		{
-			return OutWorldContext->SpawnActor<T>(PlayerWeaponClasses[WeaponID], CustomTransformToSpawn);
+			if (UWeaponDataAsset** const WeaponDA = WeaponSet.Find(WeaponID))
+			{
+				if (UClass* const Class = (*WeaponDA)->GetClass())
+				{
+					return GetWorld()->SpawnActor<T>(Class, CustomTransformToSpawn);
+				}
+			}
 		}
 #ifdef WITH_EDITOR
-		else UE_LOG(LogTemp, Warning, TEXT("Weapon cannot be spawned (Weapon ID : %i)"), WeaponID);
+		else UE_LOG(LogTemp, Warning, TEXT("Weapon cannot be spawned, a weapon that associated with the ID(%i) cannot be found or OutWorldContext isn't valid."), WeaponID);
 #endif
+
 		return nullptr;
 	}
 
@@ -43,12 +46,10 @@ public:
 	* If only a weapon is needed use CreateWeapon insted of.
 	*/
 	template<typename T>
-	T* SpawnWeapon(UWorld* const OutWorldContext, UClass* const Class, const FTransform& CustomTransformToSpawn = FTransform(FVector(0.0f, 0.0f, -1000.0f)))
+	T* SpawnWeapon(UClass* const Class, const FTransform& CustomTransformToSpawn = FTransform(FVector(0.0f, 0.0f, -1000.0f)))
 	{
-		if (OutWorldContext && Class)
-		{
-			return OutWorldContext->SpawnActor<T>(Class, CustomTransformToSpawn);
-		}
+		if (GetWorld() && Class)
+			return GetWorld()->SpawnActor<T>(Class, CustomTransformToSpawn);
 #ifdef WITH_EDITOR
 		else UE_LOG(LogTemp, Warning, TEXT("Weapon cannot be spawned"));
 #endif
@@ -60,29 +61,55 @@ public:
 	* Returns a AWeapon
 	*  If weapon object type of a particual class is needed, use SpawnWeapon.
 	*/
-	AWeapon* CreateWeapon(UWorld* const OutWorldContext, int WeaponID, const FTransform& CustomTransformToSpawn = FTransform(FVector(0.0f, 0.0f, -1000.0f)));
+	AWeapon* CreateWeapon(int32 WeaponID, const FTransform& CustomTransformToSpawn = FTransform(FVector(0.0f, 0.0f, -1000.0f)));
 
 	/*
 	* Spawns a weapon object of Class at specified transform in specified world.
 	* Returns a AWeapon
 	* If weapon object type of a particual class is needed, use SpawnWeapon.
 	*/
-	AWeapon* CreateWeapon(UWorld* const OutWorldContext, UClass* const Class, const FTransform& CustomTransformToSpawn = FTransform(FVector(0.0f, 0.0f, -1000.0f)));
+	AWeapon* CreateWeapon(UClass* const Class, const FTransform& CustomTransformToSpawn = FTransform(FVector(0.0f, 0.0f, -1000.0f)));
 
 	/*
 	* For blueprint only.
-	* USe CreateWeapon insted of.
+	* Use CreateWeapon insted of.
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Weapon", meta = (DisplayName = "Create Weapon By ID"))
-	AWeapon* BP_CreateWeaponByID(UWorld* const OutWorldContext, int WeaponID, UPARAM(ref) FTransform& CustomTransformToSpawn);
+	AWeapon* BP_CreateWeaponByID(int32 WeaponID, UPARAM(ref) FTransform& CustomTransformToSpawn);
 
 	/*
 	* For blueprint only.
-	* USe CreateWeapon insted of.
+	* Ue CreateWeapon insted of.
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Weapon", meta = (DisplayName = "Create Weapon By Class"))
-	AWeapon* BP_CreateWeaponByClass(UWorld* const OutWorldContext, UClass* const Class, UPARAM(ref) FTransform& CustomTransformToSpawn);
+	AWeapon* BP_CreateWeaponByClass(UClass* const Class, UPARAM(ref) FTransform& CustomTransformToSpawn);
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon", meta =(DisplayName = "Get Weapon Data By ID"))
+	FORCEINLINE const class UWeaponDataAsset* const GetWeaponDataByID(int WeaponID);
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon", meta = (DisplayName = "Get Weapon Data By Class"))
+	const class UWeaponDataAsset* const GetWeaponDataByClass(UClass* const Class);
+
+	template<typename T>
+	FORCEINLINE const T* const GetWeaponData(int WeaponID)
+	{
+		return Cast<T>(*WeaponSet.Find(WeaponID));
+	}
+
+	template<typename T>
+	const T* const GetWeaponData(UClass* const Class)
+	{
+		for (const TTuple<int, UWeaponDataAsset*>& i : WeaponSet)
+		{
+			if (i.Value && i.Value->GetClass == Class)
+				return Cast<T>(i.Value);
+		}
+		return nullptr;
+	}
 
 private:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Weapons", meta = (AllowPrivateAccess = "true"))
+	TMap<int, class UWeaponDataAsset*> WeaponSet;
 
 };

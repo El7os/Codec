@@ -10,7 +10,8 @@ UCLASS()
 class CDC_API UCCombatComponent : public UAbilitySystemComponent
 {
 	GENERATED_BODY()
-	
+	friend class ACamp;
+
 public:
 
 	UFUNCTION(BlueprintCallable)
@@ -42,7 +43,7 @@ private:
 
 	AWeapon* const GetCurrentWeapon_Internal();
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		TArray<class AWeapon*> WeaponSlots;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true", ClampMin = "0"))

@@ -9,9 +9,6 @@
 #include "CDC/Controllers/CPlayerController.h"
 
 
-APlayerWeapon::APlayerWeapon() : AWeapon()
-{
-}
 
 void APlayerWeapon::Init(UCCombatComponent* CombatComponent)
 {

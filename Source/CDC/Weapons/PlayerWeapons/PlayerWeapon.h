@@ -29,7 +29,7 @@ virtual void On##InputName##InputBlocked() override;
 
 
 /**
- *
+ *Optimizasyon maksadi ile silahlarýn yetenek sinisflari static olarak tutulabilir. Ne de olsa instance editable olmayacaklar.
  */
 UCLASS(Abstract)
 class CDC_API APlayerWeapon : public AWeapon
@@ -38,8 +38,6 @@ class CDC_API APlayerWeapon : public AWeapon
 		friend class ACPlayerController;
 
 public:
-
-	APlayerWeapon();
 
 protected:
 
@@ -55,29 +53,30 @@ protected:
 	virtual void OnUnselected(TEnumAsByte<UnselectReason> UnSelectReason) override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
-		TSubclassOf<class UCGameplayAbility> PrimaryAbilityClass;
+	TSubclassOf<class UCGameplayAbility> PrimaryAbilityClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
-		TSubclassOf<class UCGameplayAbility> SecondaryAbilityClass;
+	TSubclassOf<class UCGameplayAbility> SecondaryAbilityClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
-		TSubclassOf<class UCGameplayAbility> TertiaryAbilityClass;
+	TSubclassOf<class UCGameplayAbility> TertiaryAbilityClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
-		TSubclassOf<class UCGameplayAbility> QuaternaryAbilityClass;
+	TSubclassOf<class UCGameplayAbility> QuaternaryAbilityClass;
 
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-		FGameplayAbilitySpecHandle PrimaryAbilitySpecHandle;
+	FGameplayAbilitySpecHandle PrimaryAbilitySpecHandle;
 
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-		FGameplayAbilitySpecHandle SecondaryAbilitySpecHandle;
+	FGameplayAbilitySpecHandle SecondaryAbilitySpecHandle;
 
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-		FGameplayAbilitySpecHandle TertiaryAbilitySpecHandle;
+	FGameplayAbilitySpecHandle TertiaryAbilitySpecHandle;
 
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-		FGameplayAbilitySpecHandle QuaternaryAbilitySpecHandle;
+	FGameplayAbilitySpecHandle QuaternaryAbilitySpecHandle;
 
 	UPROPERTY()
-		class ACPlayerController* PC = nullptr;
+	class ACPlayerController* PC = nullptr;
+
 };

@@ -34,19 +34,18 @@ bool UCCombatComponent::AssignWeaponToSlot(AWeapon* const Weapon, int32 TargetSl
 	if (!Weapon || TargetSlotIndex < 0) return false;
 	if (GetSlotSize() && GetSlotSize() > TargetSlotIndex && TargetSlotIndex >= 0)
 	{
-		AWeapon* SlotWeapon = WeaponSlots[TargetSlotIndex];
-		if (SlotWeapon)
+		if (WeaponSlots[TargetSlotIndex])
 		{
 			if (!bRemoveExistingWeaponAtTargetSlot) return false;
 			if (CurrentSlotID == TargetSlotIndex)
-				SlotWeapon->OnUnselected(UnselectReason::UnSelectReason_Replace);
-			SlotWeapon->Destroy();
+				WeaponSlots[TargetSlotIndex]->OnUnselected(UnselectReason::UnSelectReason_Replace);
+			WeaponSlots[TargetSlotIndex]->Destroy();
 		}
-		SlotWeapon = Weapon;
-		SlotWeapon->Init(this);
+		WeaponSlots[TargetSlotIndex] = Weapon;
+		WeaponSlots[TargetSlotIndex]->Init(this);
 
 		if (CurrentSlotID == TargetSlotIndex)
-			SlotWeapon->OnSelected();
+			WeaponSlots[TargetSlotIndex]->OnSelected();
 		else if (bForceToSelect)
 			ChangeSlot(TargetSlotIndex);
 		return true;
