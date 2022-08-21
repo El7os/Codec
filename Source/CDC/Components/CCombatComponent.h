@@ -15,7 +15,7 @@ class CDC_API UCCombatComponent : public UAbilitySystemComponent
 public:
 
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE class AWeapon* const GetCurrentWeapon() { return GetCurrentWeapon_Internal(); };
+	FORCEINLINE class AWeapon* const GetCurrentWeapon() const { return GetCurrentWeapon_Internal(); };
 
 	UFUNCTION(BlueprintCallable)
 	bool ChangeSlot(int32 TargetSlot);
@@ -27,21 +27,33 @@ public:
 	bool AppendAndAssignWeapon(class AWeapon* const Weapon, bool bCreateSlotToAdd = false, bool bForceToSelect = false);
 
 	UFUNCTION(BlueprintCallable)
-	bool RemoveWeapon(int32 TargetSlot);
+	bool RemoveWeaponAtTargetSlot(int32 TargetSlot);
 
 	bool RemoveWeapon(class AWeapon* const Weapon);
 
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE int32 GetSlotSize() { return WeaponSlots.Num(); }
+	FORCEINLINE int32 GetSlotSize() const { return WeaponSlots.Num(); }
 
 	UFUNCTION(BlueprintCallable)
 	int32 CreateSlot(int32 SlotCount = 1);
 
 	virtual void Activate(bool bReset) override;
 
+	UFUNCTION(BlueprintCallable)
+	void AddWeaponByID(int32 WeaponID, bool bForceToSelect = false);
+
+	UFUNCTION(BlueprintCallable)
+	void AddWeaponByClass(UClass* const Class, bool bForceToSelect = false);
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetFirstEmptySlotIndex();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FORCEINLINE int32 GetCurrentSlotIndex() { return CurrentSlotID; }
+
 private:
 
-	AWeapon* const GetCurrentWeapon_Internal();
+	AWeapon* GetCurrentWeapon_Internal() const;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		TArray<class AWeapon*> WeaponSlots;

@@ -21,9 +21,9 @@ class CDC_API UWeaponDataAsset : public UDataAsset
 	
 public:
 
-	FORCEINLINE const FName& GetName() { return Name; }
+	FORCEINLINE const FName& GetName() const { return Name; }
 
-	FORCEINLINE UClass* const GetClass() { return Class; }
+	FORCEINLINE UClass* const GetClass() const { return Class; }
 
 private:
 
@@ -41,15 +41,15 @@ class CDC_API UPlayerWeaponDataAsset : public UWeaponDataAsset
 
 public:
 
-	FORCEINLINE const UTexture2D* const GetIcon() { return Icon; }
+	FORCEINLINE const UTexture2D* const GetIcon() const { return Icon; }
 
-	FORCEINLINE const UPlayerAbilityDataAsset* const GetPriamaryAbilityDataAsset() { return PrimaryAbilityDataAsset; }
+	FORCEINLINE const UPlayerAbilityDataAsset* const GetPriamaryAbilityDataAsset() const { return PrimaryAbilityDataAsset; }
 
-	FORCEINLINE const UPlayerAbilityDataAsset* const GetSecondaryAbilityyDataAsset() { return SecondaryAbilityDataAsset; }
+	FORCEINLINE const UPlayerAbilityDataAsset* const GetSecondaryAbilityyDataAsset() const { return SecondaryAbilityDataAsset; }
 
-	FORCEINLINE const UPlayerAbilityDataAsset* const GetTertiaryAbilityyDataAsset() { return TertiaryAbilityDataAsset; }
+	FORCEINLINE const UPlayerAbilityDataAsset* const GetTertiaryAbilityyDataAsset() const { return TertiaryAbilityDataAsset; }
 
-	FORCEINLINE const UPlayerAbilityDataAsset* const GetQuaternaryAbilityyDataAsset() { return QuaternaryAbilityDataAsset; }
+	FORCEINLINE const UPlayerAbilityDataAsset* const GetQuaternaryAbilityyDataAsset() const { return QuaternaryAbilityDataAsset; }
 
 private:
 
@@ -76,7 +76,7 @@ class CDC_API UAIWeaponDataAsset : public UWeaponDataAsset
 
 public:
 
-	FORCEINLINE const TArray<UAbilityDataAsset*>& GetAbilityClasses() { return AbilityDataAssets; }
+	FORCEINLINE const TArray<UAbilityDataAsset*>& GetAbilityClasses() const { return AbilityDataAssets; }
 
 private:
 

@@ -52,18 +52,6 @@ protected:
 
 	virtual void OnUnselected(TEnumAsByte<UnselectReason> UnSelectReason) override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UCGameplayAbility> PrimaryAbilityClass;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UCGameplayAbility> SecondaryAbilityClass;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UCGameplayAbility> TertiaryAbilityClass;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UCGameplayAbility> QuaternaryAbilityClass;
-
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	FGameplayAbilitySpecHandle PrimaryAbilitySpecHandle;
 

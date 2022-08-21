@@ -17,9 +17,9 @@ class CDC_API UAbilityDataAsset : public UDataAsset
 	
 public:
 
-	FORCEINLINE const FName& GetName() { return Name; }
+	FORCEINLINE const FName& GetName() const { return Name; }
 
-	FORCEINLINE UClass* const GetClass() { return Class; }
+	FORCEINLINE UClass* const GetClass() const { return Class; }
 
 private:
 
@@ -37,9 +37,9 @@ class CDC_API UPlayerAbilityDataAsset : public UAbilityDataAsset
 
 public:
 	
-	FORCEINLINE const UTexture2D* const GetIcon() { return Icon; }
+	FORCEINLINE const UTexture2D* const GetIcon() const { return Icon; }
 
-	FORCEINLINE const FText& GetDescription() { return Description; }
+	FORCEINLINE const FText& GetDescription() const { return Description; }
 
 private:
 

@@ -21,7 +21,7 @@ public:
 	* If only a AWeapon is needed use CreateWeapon insted of.
 	*/
 	template<typename T>
-	T* SpawnWeapon(UWorld* const OutWorldContext, int32 WeaponID, const FTransform& CustomTransformToSpawn = FTransform(FVector(0.0f, 0.0f, -1000.0f)))
+	T* SpawnWeapon(int32 WeaponID, const FTransform& CustomTransformToSpawn = FTransform(FVector(0.0f, 0.0f, -1000.0f)))
 	{
 		if (GetWorld())
 		{
@@ -61,6 +61,7 @@ public:
 	* Returns a AWeapon
 	*  If weapon object type of a particual class is needed, use SpawnWeapon.
 	*/
+	
 	AWeapon* CreateWeapon(int32 WeaponID, const FTransform& CustomTransformToSpawn = FTransform(FVector(0.0f, 0.0f, -1000.0f)));
 
 	/*
@@ -81,7 +82,7 @@ public:
 	* For blueprint only.
 	* Ue CreateWeapon insted of.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "Weapon", meta = (DisplayName = "Create Weapon By Class"))
+	UFUNCTION(BlueprintCallable,Category = "Weapon", meta = (DisplayName = "Create Weapon By Class"))
 	AWeapon* BP_CreateWeaponByClass(UClass* const Class, UPARAM(ref) FTransform& CustomTransformToSpawn);
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon", meta =(DisplayName = "Get Weapon Data By ID"))
@@ -99,13 +100,26 @@ public:
 	template<typename T>
 	const T* const GetWeaponData(UClass* const Class)
 	{
-		for (const TTuple<int, UWeaponDataAsset*>& i : WeaponSet)
+		for (const TTuple<int, UWeaponDataAsset*>& i : WeaponSet)  
 		{
 			if (i.Value && i.Value->GetClass == Class)
 				return Cast<T>(i.Value);
 		}
 		return nullptr;
 	}
+
+#pragma region DEBUG
+
+	UFUNCTION(Exec)
+	void AddWeaponByID(int32 ID, bool bForceToSelect);
+
+	UFUNCTION(Exec)
+	void AddWeaponToSlotByID(int32 ID, int32 TargetSlot, bool bRemoveExistingWeapon, bool bForceToSelect);
+
+	UFUNCTION(Exec)
+	void AddSlot(int32 SlotCount);
+
+#pragma endregion
 
 private:
 

@@ -5,7 +5,9 @@
 
 #include "CDC/Weapons/Weapon.h"
 #include "CDC/Data/Weapon/DataAssets/WeaponDataAsset.h"
-
+#include "CDC/Characters/CPlayerCharacter.h"
+#include "Kismet/GameplayStatics.h"
+#include "CDC/Components/CCombatComponent.h"
 
 
 AWeapon* UCodecGameInstance::CreateWeapon(int32 WeaponID, const FTransform& CustomTransformToSpawn)
@@ -82,4 +84,37 @@ const UWeaponDataAsset* const UCodecGameInstance::GetWeaponDataByClass(UClass* c
 	}
 
 	return nullptr;
+}
+
+void UCodecGameInstance::AddWeaponByID(int32 ID, bool bForceToSelect)
+{
+	if (ACPlayerCharacter* const PlayerChar = Cast<ACPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+	{
+		if (UCCombatComponent* const CombatComp = PlayerChar->FindComponentByClass<UCCombatComponent>())
+			CombatComp->AddWeaponByID(ID, bForceToSelect);
+	}
+}
+
+void UCodecGameInstance::AddWeaponToSlotByID(int32 ID, int32 TargetSlot,bool bRemoveExistingWeapon, bool bForceToSelect)
+{
+	if (ACPlayerCharacter* const PlayerChar = Cast<ACPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+	{
+		if (UCCombatComponent* const CombatComp = PlayerChar->FindComponentByClass<UCCombatComponent>())
+		{
+			FTransform TargetTransform = FTransform(FVector(0.f,0.f,-100.f));
+			if (AWeapon* Weapon = CreateWeapon(ID, TargetTransform))
+				CombatComp->AssignWeaponToSlot(Weapon, TargetSlot, bRemoveExistingWeapon, bForceToSelect);
+		}
+	}
+}
+
+void UCodecGameInstance::AddSlot(int32 SlotCount)
+{
+	if (ACPlayerCharacter* const PlayerChar = Cast<ACPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+	{
+		if (UCCombatComponent* const CombatComp = PlayerChar->FindComponentByClass<UCCombatComponent>())
+		{
+			CombatComp->CreateSlot(SlotCount);
+		}
+	}
 }
