@@ -54,11 +54,6 @@ bool UCCombatComponent::AssignWeaponToSlot(AWeapon* const Weapon, int32 TargetSl
 	return false;
 }
 
-bool UCCombatComponent::AppendAndAssignWeapon(AWeapon* const Weapon, bool bCreateSlotToAdd, bool bForceToSelect)
-{
-	return false;
-}
-
 bool UCCombatComponent::RemoveWeaponAtTargetSlot(int32 TargetSlot)
 {
 	if (GetSlotSize() && GetSlotSize() > TargetSlot && TargetSlot >= 0)
@@ -102,7 +97,6 @@ int32 UCCombatComponent::CreateSlot(int32 SlotCount)
 
 void UCCombatComponent::AddWeaponByID(int32 WeaponID, bool bForceToSelect)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Weapon ID : i"), WeaponID);
 	if (UCodecGameInstance* const GameInst = Cast<UCodecGameInstance>(GetOwner()->GetGameInstance()))
 	{
 		FTransform SpawnLocation = FTransform(FVector(0.0f, 0.0f, -100.f));

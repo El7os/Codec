@@ -118,3 +118,14 @@ void UCodecGameInstance::AddSlot(int32 SlotCount)
 		}
 	}
 }
+
+void UCodecGameInstance::RemoveWeaponAtSlot(int32 SlotIndex)
+{
+	if (ACPlayerCharacter* const PlaayerCharacter = Cast<ACPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+	{
+		if (UCCombatComponent* const CombatComp = PlaayerCharacter->FindComponentByClass<UCCombatComponent>())
+		{
+			CombatComp->RemoveWeaponAtTargetSlot(SlotIndex);
+		}
+	}
+}

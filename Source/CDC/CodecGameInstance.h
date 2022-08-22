@@ -119,6 +119,9 @@ public:
 	UFUNCTION(Exec)
 	void AddSlot(int32 SlotCount);
 
+	UFUNCTION(Exec)
+	void RemoveWeaponAtSlot(int32 SlotIndex);
+
 #pragma endregion
 
 private:
