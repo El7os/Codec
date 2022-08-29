@@ -14,7 +14,6 @@ enum UnselectReason
 };
 
 
-
 UCLASS(Abstract)
 class CDC_API AWeapon : public AActor
 {
@@ -37,5 +36,4 @@ protected:
 	virtual void OnUnselected(TEnumAsByte<UnselectReason> Reason) {};
 
 	class UCCombatComponent* Component;
-
 };

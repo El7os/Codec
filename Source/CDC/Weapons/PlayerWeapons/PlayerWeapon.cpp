@@ -9,9 +9,6 @@
 #include "CDC/Controllers/CPlayerController.h"
 
 
-APlayerWeapon::APlayerWeapon() : AWeapon()
-{
-}
 
 void APlayerWeapon::Init(UCCombatComponent* CombatComponent)
 {
@@ -28,11 +25,11 @@ void APlayerWeapon::OnSelected()
 		PC->BindWeapon(this);
 	
 	if (Component)
-	{
+	{/*
 		PrimaryAbilitySpecHandle = Component->GiveAbility(FGameplayAbilitySpec(PrimaryAbilityClass, 1, -1, this));
 		SecondaryAbilitySpecHandle = Component->GiveAbility(FGameplayAbilitySpec(SecondaryAbilityClass, 1, -1, this));
 		TertiaryAbilitySpecHandle = Component->GiveAbility(FGameplayAbilitySpec(TertiaryAbilityClass, 1, -1, this));
-		QuaternaryAbilitySpecHandle = Component->GiveAbility(FGameplayAbilitySpec(QuaternaryAbilityClass, 1, -1, this));
+		QuaternaryAbilitySpecHandle = Component->GiveAbility(FGameplayAbilitySpec(QuaternaryAbilityClass, 1, -1, this));*/
 	}
 }
 
@@ -45,9 +42,9 @@ void APlayerWeapon::OnUnselected(TEnumAsByte<UnselectReason> UnSelectReason)
 
 	if (Component)
 	{
-		Component->SetRemoveAbilityOnEnd(PrimaryAbilitySpecHandle);
+		/*Component->SetRemoveAbilityOnEnd(PrimaryAbilitySpecHandle);
 		Component->SetRemoveAbilityOnEnd(SecondaryAbilitySpecHandle);
 		Component->SetRemoveAbilityOnEnd(TertiaryAbilitySpecHandle);
-		Component->SetRemoveAbilityOnEnd(QuaternaryAbilitySpecHandle);
+		Component->SetRemoveAbilityOnEnd(QuaternaryAbilitySpecHandle);*/
 	}
 }

@@ -3,6 +3,7 @@
 
 #include "CDC/Components/CCombatComponent.h"
 
+#include "CDC/CodecGameInstance.h"
 #include "CDC/Weapons/Weapon.h"
 
 
@@ -34,19 +35,18 @@ bool UCCombatComponent::AssignWeaponToSlot(AWeapon* const Weapon, int32 TargetSl
 	if (!Weapon || TargetSlotIndex < 0) return false;
 	if (GetSlotSize() && GetSlotSize() > TargetSlotIndex && TargetSlotIndex >= 0)
 	{
-		AWeapon* SlotWeapon = WeaponSlots[TargetSlotIndex];
-		if (SlotWeapon)
+		if (WeaponSlots[TargetSlotIndex])
 		{
 			if (!bRemoveExistingWeaponAtTargetSlot) return false;
 			if (CurrentSlotID == TargetSlotIndex)
-				SlotWeapon->OnUnselected(UnselectReason::UnSelectReason_Replace);
-			SlotWeapon->Destroy();
+				WeaponSlots[TargetSlotIndex]->OnUnselected(UnselectReason::UnSelectReason_Replace);
+			WeaponSlots[TargetSlotIndex]->Destroy();
 		}
-		SlotWeapon = Weapon;
-		SlotWeapon->Init(this);
+		WeaponSlots[TargetSlotIndex] = Weapon;
+		WeaponSlots[TargetSlotIndex]->Init(this);
 
 		if (CurrentSlotID == TargetSlotIndex)
-			SlotWeapon->OnSelected();
+			WeaponSlots[TargetSlotIndex]->OnSelected();
 		else if (bForceToSelect)
 			ChangeSlot(TargetSlotIndex);
 		return true;
@@ -54,12 +54,7 @@ bool UCCombatComponent::AssignWeaponToSlot(AWeapon* const Weapon, int32 TargetSl
 	return false;
 }
 
-bool UCCombatComponent::AppendAndAssignWeapon(AWeapon* const Weapon, bool bCreateSlotToAdd, bool bForceToSelect)
-{
-	return false;
-}
-
-bool UCCombatComponent::RemoveWeapon(int32 TargetSlot)
+bool UCCombatComponent::RemoveWeaponAtTargetSlot(int32 TargetSlot)
 {
 	if (GetSlotSize() && GetSlotSize() > TargetSlot && TargetSlot >= 0)
 	{
@@ -100,8 +95,40 @@ int32 UCCombatComponent::CreateSlot(int32 SlotCount)
 	return WeaponSlots.AddDefaulted(SlotCount);
 }
 
+void UCCombatComponent::AddWeaponByID(int32 WeaponID, bool bForceToSelect)
+{
+	if (UCodecGameInstance* const GameInst = Cast<UCodecGameInstance>(GetOwner()->GetGameInstance()))
+	{
+		FTransform SpawnLocation = FTransform(FVector(0.0f, 0.0f, -100.f));
+		if (AWeapon* const Weapon = GameInst->CreateWeapon(WeaponID, SpawnLocation))
+			GetFirstEmptySlotIndex() >= 0 ? AssignWeaponToSlot(Weapon, GetFirstEmptySlotIndex(), false, bForceToSelect) : AssignWeaponToSlot(Weapon, CreateSlot(), false, bForceToSelect);
+	}
+}
 
-AWeapon* const UCCombatComponent::GetCurrentWeapon_Internal()
+void UCCombatComponent::AddWeaponByClass(UClass* const Class, bool bForceToSelect)
+{
+	if (!Class) return;
+
+	if (UCodecGameInstance* const GameInst = Cast<UCodecGameInstance>(GetOwner()->GetGameInstance()))
+	{
+		FTransform SpawnLocation = FTransform(FVector(0.0f, 0.0f, -100.f));
+		if (AWeapon* const Weapon = GameInst->CreateWeapon(Class, SpawnLocation))
+			GetFirstEmptySlotIndex() >= 0 ? AssignWeaponToSlot(Weapon, GetFirstEmptySlotIndex(), false, bForceToSelect) : AssignWeaponToSlot(Weapon, CreateSlot(), false, bForceToSelect);
+	}
+}
+
+int32 UCCombatComponent::GetFirstEmptySlotIndex()
+{
+	int32 Size = GetSlotSize();
+	for (int i = 0; i < Size; i++)
+	{
+		if (!WeaponSlots[i])
+			return i;
+	}
+	return -1;
+}
+
+AWeapon* UCCombatComponent::GetCurrentWeapon_Internal() const
 {
 	if (GetSlotSize())
 		return WeaponSlots[CurrentSlotID];
