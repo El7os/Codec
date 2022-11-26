@@ -14,17 +14,4 @@ class CDC_API ACCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-public:
-	
-	ACCharacter();
-
-	virtual void Tick(float DeltaTime) override;
-
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-protected:
-
-	virtual void BeginPlay() override;
-
-
 };

@@ -162,7 +162,6 @@ public:
 	
 	DECLARE_DELEGATE(NoParamOnMediatorUpdateDelegate)
 
-
 	ACPlayerController();
 
 	UFUNCTION()
