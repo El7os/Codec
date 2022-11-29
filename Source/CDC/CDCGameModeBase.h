@@ -13,5 +13,4 @@ UCLASS()
 class CDC_API ACDCGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
 };

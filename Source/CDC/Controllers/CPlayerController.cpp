@@ -54,7 +54,7 @@ void ACPlayerController::BeginPlay()
 
 void ACPlayerController::OnInputMediatorUpdated(const UInputMediator* const InputMediator)
 {
-	if (UInputMediator* InputMediator = GetGameInstance()->GetSubsystem<UInputMediator>())
+	if (InputMediator)
 	{
 		bool CacheForPrimary = InputMediator->bIsWeaponPrimaryInputBlocked();
 		bool CacheForSecondary = InputMediator->bIsWeaponSecondaryInputBlocked();
